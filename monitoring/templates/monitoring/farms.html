@@ -1,0 +1,109 @@
+{% extends 'monitoring/base.html' %}
+{% load static %}
+
+{% block title %}Farms – AquaMonitor{% endblock %}
+{% block page_title %}My Farms{% endblock %}
+
+{% block content %}
+
+<!-- Elegant Header -->
+<div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+  <div>
+    <h3 class="fw-bold text-dark mb-1">Farm Management</h3>
+    <p class="text-muted mb-0">Overview and status of all your registered aquaculture sites.</p>
+  </div>
+  <a href="{% url 'dashboard' %}" class="btn bg-white rounded-pill px-4 fw-medium transition-all hover-lift shadow-sm border border-secondary-subtle text-dark">
+    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+  </a>
+</div>
+
+<!-- Main Table Card -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
+  
+  <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+    <h5 class="fw-semibold mb-0 text-dark d-flex align-items-center">
+      <div class="bg-primary bg-opacity-10 text-primary rounded px-2 py-1 me-2"><i class="bi bi-geo-alt-fill"></i></div>
+      Active Sites
+      <span class="badge bg-light text-secondary border ms-3 rounded-pill">{{ farms|length }} total</span>
+    </h5>
+  </div>
+  
+  <div class="card-body p-0">
+    {% if farms %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 border-transparent">
+        <thead class="bg-light text-muted" style="font-size: 0.8rem; letter-spacing: 0.5px; text-transform: uppercase;">
+          <tr>
+            <th class="ps-4 py-3 fw-semibold border-0">Farm Name</th>
+            <th class="py-3 fw-semibold border-0">Location</th>
+            <th class="py-3 fw-semibold border-0">Status</th>
+            <th class="py-3 fw-semibold border-0 text-center">Ponds</th>
+            <th class="py-3 fw-semibold border-0">Registered</th>
+            <th class="pe-4 py-3 fw-semibold border-0 text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="border-top-0">
+          {% for farm in farms %}
+          <tr class="transition-all hover-bg-light position-relative" style="cursor: pointer;" onclick="window.location='{% url 'farm_detail' farm.id %}'">
+            
+            <td class="ps-4 py-4">
+              <div class="d-flex align-items-center">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 45px; height: 45px; font-size: 1.25rem;">
+                  <span class="fw-bold">{{ farm.name|slice:":1"|upper }}</span>
+                </div>
+                <div>
+                  <h6 class="mb-0 fw-bold text-dark fs-6">{{ farm.name }}</h6>
+                  <small class="text-muted" style="font-size: 0.75rem;">ID: #{{ farm.id|stringformat:"04d" }}</small>
+                </div>
+              </div>
+            </td>
+            
+            <td class="py-4 text-secondary fw-medium">
+              <i class="bi bi-geo text-muted me-1"></i>{{ farm.location|default:"Unspecified" }}
+            </td>
+            
+            <td class="py-4">
+              {% if farm.status == 'active' %}
+                <span class="badge bg-success-soft text-success border border-success rounded-pill px-3 py-1 fw-medium" style="font-size: 0.75rem;"><i class="bi bi-check-circle me-1"></i>Active</span>
+              {% else %}
+                <span class="badge bg-secondary-soft text-secondary border border-secondary rounded-pill px-3 py-1 fw-medium" style="font-size: 0.75rem;"><i class="bi bi-pause-circle me-1"></i>Inactive</span>
+              {% endif %}
+            </td>
+            
+            <td class="py-4 text-center">
+              <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fs-6 fw-bold border border-primary-subtle">
+                {{ farm.ponds.count }}
+              </span>
+            </td>
+            
+            <td class="py-4 text-muted fw-medium" style="font-size: 0.9rem;">
+              {{ farm.created_at|date:"M d, Y" }}
+            </td>
+            
+            <td class="pe-4 py-4 text-end">
+              <a href="{% url 'farm_detail' farm.id %}" class="btn btn-sm bg-white border shadow-sm rounded-pill px-3 fw-medium text-primary transition-all hover-lift position-relative z-2" onclick="event.stopPropagation();">
+                View Details <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </td>
+            
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3 text-secondary shadow-sm" style="width: 80px; height: 80px;">
+        <i class="bi bi-geo-alt" style="font-size: 2.5rem;"></i>
+      </div>
+      <h4 class="fw-bold text-dark mb-2 mt-2">No Farms Registered</h4>
+      <p class="text-muted mb-4 mx-auto" style="max-width: 400px; line-height: 1.6;">You haven't added any aquaculture sites to your account yet. System administrators can register new facilities.</p>
+      <a href="/admin/monitoring/farm/add/" target="_blank" class="btn btn-primary rounded-pill px-4 py-2 transition-all hover-lift shadow-sm fw-medium">
+        <i class="bi bi-plus-lg me-2"></i>Register New Farm
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

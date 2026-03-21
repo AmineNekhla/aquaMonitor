@@ -1,0 +1,88 @@
+{% extends 'monitoring/base.html' %}
+
+{% block title %}Alerts – AquaMonitor{% endblock %}
+{% block page_title %}Alerts{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span class="fw-semibold"><i class="bi bi-bell me-2"></i>All Alerts ({{ alerts|length }})</span>
+    {% if alerts %}
+    <a href="{% url 'mark_all_alerts_read' %}" class="btn btn-sm btn-outline-teal">
+      <i class="bi bi-check2-all me-1"></i>Mark all as read
+    </a>
+    {% endif %}
+  </div>
+  <div class="card-body p-0">
+    {% if alerts %}
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Pond</th>
+          <th>Farm</th>
+          <th>Type</th>
+          <th>Severity</th>
+          <th>Status</th>
+          <th>Message</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alert in alerts %}
+        <tr>
+          <td class="text-muted">{{ forloop.counter }}</td>
+          <td class="fw-medium">{{ alert.title }}</td>
+          <td>
+            <a href="{% url 'pond_detail' alert.pond.id %}">{{ alert.pond.name }}</a>
+          </td>
+          <td>{{ alert.pond.farm.name }}</td>
+          <td class="text-muted small">{{ alert.get_alert_type_display }}</td>
+          <td>
+            {% if alert.severity == 'critical' %}
+              <span class="badge bg-danger">Critical</span>
+            {% elif alert.severity == 'high' %}
+              <span class="badge bg-orange text-white">High</span>
+            {% elif alert.severity == 'warning' %}
+              <span class="badge bg-warning text-dark">Warning</span>
+            {% else %}
+              <span class="badge bg-info text-dark">Info</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if alert.status == 'open' %}
+              <span class="badge bg-danger-soft text-danger border border-danger">Open</span>
+            {% elif alert.status == 'acknowledged' %}
+              <span class="badge bg-warning-soft text-warning border border-warning">Acknowledged</span>
+            {% else %}
+              <span class="badge bg-success-soft text-success border border-success">Resolved</span>
+            {% endif %}
+          </td>
+          <td class="text-muted small" style="max-width:200px;">
+            {{ alert.message|truncatechars:80 }}
+          </td>
+          <td class="text-muted small text-nowrap">{{ alert.created_at|date:"d M Y H:i" }}</td>
+          <td>
+            {% if alert.status == 'open' %}
+            <a href="{% url 'mark_alert_read' alert.id %}" class="btn btn-sm btn-light" title="Mark as read" data-bs-toggle="tooltip">
+              <i class="bi bi-check-circle text-success fs-6"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-check-circle fs-2 d-block mb-2 text-success"></i>
+      No alerts found — all ponds are operating normally!
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

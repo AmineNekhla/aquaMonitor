@@ -1,0 +1,107 @@
+{% extends 'monitoring/base.html' %}
+
+{% block title %}Profile – AquaMonitor{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-7 col-xl-6">
+
+    <div class="card">
+      <div class="card-header fw-semibold">
+        <i class="bi bi-person-circle me-2"></i>Profile Information
+      </div>
+      <div class="card-body">
+
+        <!-- Avatar placeholder + username -->
+        <div class="text-center mb-4">
+          <div class="profile-avatar mx-auto mb-2">
+            {{ request.user.username|first|upper }}
+          </div>
+          <h5 class="mb-0 fw-bold">{{ request.user.get_full_name|default:request.user.username }}</h5>
+          <small class="text-muted">@{{ request.user.username }}</small>
+        </div>
+
+        <hr />
+
+        <!-- Profile Edit Form -->
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="row g-3">
+
+            <div class="col-sm-6">
+              <label for="id_first_name" class="form-label">First Name</label>
+              <input type="text" name="first_name" id="id_first_name"
+                     class="form-control"
+                     value="{{ form.first_name.value|default_if_none:'' }}" />
+            </div>
+
+            <div class="col-sm-6">
+              <label for="id_last_name" class="form-label">Last Name</label>
+              <input type="text" name="last_name" id="id_last_name"
+                     class="form-control"
+                     value="{{ form.last_name.value|default_if_none:'' }}" />
+            </div>
+
+            <div class="col-12">
+              <label for="id_email" class="form-label">Email</label>
+              <input type="email" name="email" id="id_email"
+                     class="form-control"
+                     value="{{ form.email.value|default_if_none:'' }}" />
+            </div>
+
+            <div class="col-sm-6">
+              <label for="id_phone" class="form-label">Phone</label>
+              <input type="text" name="phone" id="id_phone"
+                     class="form-control"
+                     value="{{ form.phone.value|default_if_none:'' }}" />
+            </div>
+
+            <div class="col-sm-6">
+              <label for="id_role" class="form-label">Role</label>
+              <select name="role" id="id_role" class="form-select">
+                {% for value, label in form.fields.role.choices %}
+                <option value="{{ value }}"
+                  {% if form.role.value == value %}selected{% endif %}>
+                  {{ label }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-teal">
+              <i class="bi bi-check2-circle me-1"></i> Save Changes
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Read-only info card -->
+    <div class="card mt-3">
+      <div class="card-body">
+        <h6 class="fw-semibold mb-3">Account Info</h6>
+        <dl class="row mb-0">
+          <dt class="col-sm-5">Username</dt>
+          <dd class="col-sm-7">{{ request.user.username }}</dd>
+
+          <dt class="col-sm-5">Date Joined</dt>
+          <dd class="col-sm-7">{{ request.user.date_joined|date:"d M Y" }}</dd>
+
+          <dt class="col-sm-5">Last Login</dt>
+          <dd class="col-sm-7">{{ request.user.last_login|date:"d M Y H:i"|default:"—" }}</dd>
+        </dl>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
