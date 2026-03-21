@@ -2,14 +2,17 @@ services:
   db:
     image: postgres:15-alpine
     container_name: aqua_db
-    environment:
-      POSTGRES_DB: aquaculture_db
-      POSTGRES_USER: aqua_user
-      POSTGRES_PASSWORD: aqua_password
+    env_file:
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-aqua_user} -d ${DB_NAME:-aquaculture_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   web:
     build: .
@@ -19,17 +22,11 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    environment:
-      # Inject Django settings variables directly to the container
-      - DEBUG=True
-      - SECRET_KEY=django-insecure-docker-secret-key-123
-      - DB_NAME=aquaculture_db
-      - DB_USER=aqua_user
-      - DB_PASSWORD=aqua_password
-      - DB_HOST=db
-      - DB_PORT=5432
+    env_file:
+      - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   # Persistent volume for the PostgreSQL database

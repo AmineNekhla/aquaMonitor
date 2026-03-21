@@ -54,7 +54,7 @@ The project follows standard Django app structure with a single `monitoring` app
 
 ### 1. Navigate into the project folder
 ```bash
-cd aquaP
+cd aquaMonitor
 ```
 
 ### 2. Create a virtual environment
@@ -178,7 +178,7 @@ To run the application instantly without installing Python, PostgreSQL, or setti
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
 
 ### 1. Build and Run the Project
-Open a terminal in the `aquaP` directory and run:
+Open a terminal in the `aquaMonitor` directory and run:
 ```bash
 docker compose up --build
 ```
@@ -187,7 +187,7 @@ This automatically downloads PostgreSQL, installs Django, configures the databas
 Wait until you see logs indicating the database is ready and the development server is running. Leave this terminal open.
 
 ### 2. Setup the Database (First-Time Only)
-Open a **new, separate terminal** inside the same `aquaP` folder to execute the Django setup commands inside your running container:
+Open a **new, separate terminal** inside the same `aquaMonitor` folder to execute the Django setup commands inside your running container:
 
 **Run Migrations:**
 ```bash
