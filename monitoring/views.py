@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 
 from .models import Farm, Pond, Sensor, SensorReading, Camera, AIDetection, Alert, Profile
-from .forms import ProfileForm
+from .forms import ProfileForm, PondForm, FarmForm
 
 
 # ─── Dashboard ───────────────────────────────────────────────────────────────
@@ -137,6 +137,26 @@ def farms_list(request):
 
 
 @login_required
+def create_farm(request):
+    """
+    Create a new farm assigned to the current user.
+    """
+    if request.method == 'POST':
+        form = FarmForm(request.POST)
+        if form.is_valid():
+            new_farm = form.save(commit=False)
+            new_farm.owner = request.user  # Model uses 'owner' for the user ForeignKey
+            new_farm.save()
+            messages.success(request, f"Farm '{new_farm.name}' created successfully")
+            return redirect('farms_list')
+    else:
+        form = FarmForm()
+        
+    return render(request, 'monitoring/create_farm.html', {'form': form})
+
+
+
+@login_required
 def farm_detail(request, farm_id):
     """
     Detail page for a single farm.
@@ -146,6 +166,27 @@ def farm_detail(request, farm_id):
     farm  = get_object_or_404(Farm, id=farm_id, owner=request.user)
     ponds = Pond.objects.filter(farm=farm)
     return render(request, 'monitoring/farm_detail.html', {'farm': farm, 'ponds': ponds})
+
+
+@login_required
+def pond_create(request, farm_id):
+    """
+    Create a new pond inside a specific farm.
+    """
+    farm = get_object_or_404(Farm, id=farm_id, owner=request.user)
+    
+    if request.method == 'POST':
+        form = PondForm(request.POST)
+        if form.is_valid():
+            new_pond = form.save(commit=False)
+            new_pond.farm = farm
+            new_pond.save()
+            messages.success(request, f"Pond '{new_pond.name}' successfully added to {farm.name}.")
+            return redirect('farm_detail', farm_id=farm.id)
+    else:
+        form = PondForm()
+        
+    return render(request, 'monitoring/pond_form.html', {'form': form, 'farm': farm})
 
 
 # ─── Ponds ────────────────────────────────────────────────────────────────────

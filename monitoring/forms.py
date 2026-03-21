@@ -4,7 +4,21 @@ Forms used in the monitoring application.
 """
 
 from django import forms
-from .models import Profile
+from .models import Profile, Pond, Farm
+
+class FarmForm(forms.ModelForm):
+    class Meta:
+        model = Farm
+        fields = ['name', 'location', 'status']
+
+
+
+
+class PondForm(forms.ModelForm):
+    """Form to create or edit a Pond. The farm is set automatically in the view."""
+    class Meta:
+        model = Pond
+        fields = ['name', 'fish_species', 'fish_count', 'status']
 
 
 class ProfileForm(forms.ModelForm):

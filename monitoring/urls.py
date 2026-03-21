@@ -13,7 +13,9 @@ urlpatterns = [
 
     # Farms
     path('farms/',              views.farms_list,   name='farms_list'),
+    path('farms/create/',       views.create_farm,  name='create_farm'),
     path('farms/<int:farm_id>/',views.farm_detail,  name='farm_detail'),
+    path('farms/<int:farm_id>/ponds/add/', views.pond_create, name='pond_create'),
 
     # Ponds
     path('ponds/',                                views.ponds_list,         name='ponds_list'),

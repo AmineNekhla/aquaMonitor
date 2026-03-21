@@ -49,8 +49,11 @@
 
 <!-- Ponds in this Farm -->
 <div class="card">
-  <div class="card-header fw-semibold">
-    <i class="bi bi-droplet-half me-2"></i>Ponds ({{ ponds|length }})
+  <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-droplet-half me-2"></i>Ponds ({{ ponds|length }})</span>
+    <a href="{% url 'pond_create' farm.id %}" class="btn btn-sm btn-primary py-1 px-3 rounded-pill fw-medium shadow-sm transition-all hover-lift">
+      <i class="bi bi-plus-lg"></i> Add Pond
+    </a>
   </div>
   <div class="card-body p-0">
     {% if ponds %}
