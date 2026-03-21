@@ -7,14 +7,46 @@ A Django web application for monitoring fish farm ponds using sensors, cameras, 
 ## Project Structure
 
 ```
-aquaP/
-├── aquaculture/      ← Django project config (settings, urls, wsgi, asgi)
-├── monitoring/       ← Main app (models, views, templates, admin)
-├── static/css/       ← Custom CSS (main.css)
-├── manage.py
-├── requirements.txt
-└── .env.example
+aquaMonitor/
+│
+├── aquaculture/                  # Django project configuration
+│   ├── settings.py               # App settings (env-based DB config)
+│   ├── urls.py                   # Root URL routing
+│   ├── wsgi.py                   # WSGI entry point
+│   └── asgi.py                   # ASGI entry point
+│
+├── monitoring/                   # Main application
+│   ├── models.py                 # Database models (Farm, Pond, Alert…)
+│   ├── views.py                  # All views (dashboard, farms, ponds, alerts)
+│   ├── urls.py                   # App-level URL patterns
+│   ├── admin.py                  # Admin panel configuration
+│   ├── forms.py                  # Django forms
+│   ├── context_processors.py     # Global template context (notifications)
+│   ├── migrations/               # Database migration files
+│   └── templates/monitoring/     # HTML templates
+│       ├── base.html             # Base layout (sidebar + topbar)
+│       ├── login.html            # Login page
+│       ├── dashboard.html        # Main dashboard
+│       ├── farms.html            # Farms list
+│       ├── farm_detail.html      # Single farm view
+│       ├── ponds.html            # Ponds list
+│       ├── pond_detail.html      # Single pond + sensor data
+│       ├── alerts.html           # Alerts list
+│       └── profile.html          # User profile
+│
+├── static/css/
+│   └── main.css                  # Custom CSS styles
+│
+├── manage.py                     # Django CLI entry point
+├── requirements.txt              # Python dependencies
+├── .env.example                  # Environment variable template (safe to commit)
+│
+├── Dockerfile                    # Docker image build instructions
+├── docker-compose.yml            # Multi-container setup (web + db)
+└── .dockerignore                 # Files excluded from Docker build
 ```
+
+The project follows standard Django app structure with a single `monitoring` app handling all business logic. Docker is used for containerized deployment with a PostgreSQL database. Environment variables are managed via `.env` (not committed) using `.env.example` as a safe template.
 
 ---
 
@@ -54,8 +86,8 @@ Edit `.env`:
 ```
 SECRET_KEY=any-random-secret-key
 DB_NAME=aquaculture_db
-DB_USER=postgres
-DB_PASSWORD=yourpassword
+DB_USER=aqua_user
+DB_PASSWORD=aqua_password
 DB_HOST=localhost
 DB_PORT=5432
 DEBUG=True
@@ -115,10 +147,11 @@ The fastest way to add data for testing is through the Django admin:
 
 ## Tech Stack
 
-- **Backend**: Django 4.2, Python 3.x
-- **Database**: PostgreSQL (via psycopg2-binary)
+- **Backend**: Django 4.2, Python 3.11
+- **Database**: PostgreSQL 15 (via psycopg2-binary)
 - **Frontend**: Django Templates, Bootstrap 5, Bootstrap Icons
 - **Auth**: Django built-in authentication + Profile model
+- **Containerisation**: Docker + Docker Compose
 
 ---
 
