@@ -4,158 +4,106 @@ A Django web application for monitoring fish farm ponds using sensors, cameras, 
 
 ---
 
-## Project Structure
+## 🚀 Quick Start (Docker - Recommended)
+
+To run the application instantly **without installing Python or PostgreSQL**, you can use Docker.
+
+### 1. Build and Run the Project
+Open a terminal in the `aquaMonitor` directory and run:
+```bash
+docker compose up --build
+```
+*Wait until you see logs indicating the database is ready and the development server is running. Leave this terminal open.*
+
+### 2. Setup the Database (First-Time Only)
+Open a **new, separate terminal** in the same folder and run migrations and create your admin account:
+```bash
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py createsuperuser
+```
+*(Enter a username, email, and password when prompted).*
+
+### 3. Access the Application
+- Web Dashboard: **http://localhost:8000/**
+- Admin Panel: **http://localhost:8000/admin/**
+
+---
+
+## ⚙️ Manual Setup (Optional)
+
+**⚠️ Note: Follow these steps ONLY if you are not using Docker.**
+
+### 1. Environment Setup
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\Activate.ps1
+# Mac/Linux:
+source venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+### 2. Configure the Database
+Copy the example env file:
+```bash
+copy .env.example .env
+```
+Edit `.env` and set `DB_HOST=localhost`. Then create the PostgreSQL database (run in psql or pgAdmin):
+```sql
+CREATE DATABASE aquaculture_db;
+```
+
+### 3. Run migrations and start server
+```bash
+python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+---
+
+## 📁 Project Structure
 
 ```
 aquaMonitor/
 │
 ├── aquaculture/                  # Django project configuration
-│   ├── settings.py               # App settings (env-based DB config)
-│   ├── urls.py                   # Root URL routing
-│   ├── wsgi.py                   # WSGI entry point
-│   └── asgi.py                   # ASGI entry point
-│
 ├── monitoring/                   # Main application
-│   ├── models.py                 # Database models (Farm, Pond, Alert…)
+│   ├── models.py                 # Database models
 │   ├── views.py                  # All views (dashboard, farms, ponds, alerts)
-│   ├── urls.py                   # App-level URL patterns
-│   ├── admin.py                  # Admin panel configuration
+│   ├── urls.py                   # App-level routing
 │   ├── forms.py                  # Django forms
-│   ├── context_processors.py     # Global template context (notifications)
-│   ├── migrations/               # Database migration files
 │   └── templates/monitoring/     # HTML templates
-│       ├── base.html             # Base layout (sidebar + topbar)
-│       ├── login.html            # Login page
-│       ├── dashboard.html        # Main dashboard
-│       ├── farms.html            # Farms list
-│       ├── farm_detail.html      # Single farm view
-│       ├── ponds.html            # Ponds list
-│       ├── pond_detail.html      # Single pond + sensor data
-│       ├── alerts.html           # Alerts list
-│       └── profile.html          # User profile
 │
-├── static/css/
-│   └── main.css                  # Custom CSS styles
-│
-├── manage.py                     # Django CLI entry point
+├── static/css/                   # Custom CSS styles
+├── manage.py                     # Django CLI
 ├── requirements.txt              # Python dependencies
-├── .env.example                  # Environment variable template (safe to commit)
+├── .env.example                  # Environment variable template
 │
 ├── Dockerfile                    # Docker image build instructions
-├── docker-compose.yml            # Multi-container setup (web + db)
-└── .dockerignore                 # Files excluded from Docker build
+├── docker-compose.yml            # Multi-container orchestration
+└── .dockerignore                 # Excluded build files
 ```
-
-The project follows standard Django app structure with a single `monitoring` app handling all business logic. Docker is used for containerized deployment with a PostgreSQL database. Environment variables are managed via `.env` (not committed) using `.env.example` as a safe template.
 
 ---
 
-## Setup & Run Instructions
+## 📊 Pages / Features
 
-### 1. Navigate into the project folder
-```bash
-cd aquaMonitor
-```
-
-### 2. Create a virtual environment
-```bash
-python -m venv venv
-```
-
-### 3. Activate the virtual environment
-**Windows (PowerShell):**
-```bash
-venv\Scripts\Activate.ps1
-```
-**Mac/Linux:**
-```bash
-source venv/bin/activate
-```
-
-### 4. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 5. Configure the database
-Copy the example env file and fill in your PostgreSQL credentials:
-```bash
-copy .env.example .env
-```
-Edit `.env`:
-```
-SECRET_KEY=any-random-secret-key
-DB_NAME=aquaculture_db
-DB_USER=aqua_user
-DB_PASSWORD=aqua_password
-DB_HOST=localhost
-DB_PORT=5432
-DEBUG=True
-```
-
-Create the PostgreSQL database (run in psql or pgAdmin):
-```sql
-CREATE DATABASE aquaculture_db;
-```
-
-### 6. Run database migrations
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-### 7. Create a superuser (admin account)
-```bash
-python manage.py createsuperuser
-```
-Enter a username, email, and password when prompted.
-
-### 8. Start the development server
-```bash
-python manage.py runserver
-```
-
-Open your browser at: **http://127.0.0.1:8000/**
+| URL | Page | Description |
+|---|---|---|
+| `/` | Dashboard | Executive KPI overview (Fish stock, Alerts, Water Quality) |
+| `/farms/` | Farms List | View all registered farms or add new ones |
+| `/farms/<id>/` | Farm Detail | Farm info and list of associated ponds |
+| `/ponds/` | Ponds Overview | Sparkline trends and latest readings across all ponds |
+| `/ponds/<id>/` | Pond Detail | Deep dive into live sensor readings, cameras, AI logs |
+| `/alerts/` | Alerts Center | Review and acknowledge system safety warnings |
+| `/profile/` | User Profile | Update your user and role definitions |
 
 ---
 
-## Pages
-
-| URL | Page |
-|---|---|
-| `/` | Dashboard |
-| `/farms/` | All Farms |
-| `/farms/<id>/` | Farm Detail + Ponds |
-| `/ponds/` | All Ponds |
-| `/ponds/<id>/` | Pond Detail (sensors, cameras, detections, alerts) |
-| `/alerts/` | All Alerts |
-| `/profile/` | User Profile |
-| `/admin/` | Django Admin Panel |
-| `/login/` | Login Page |
-
----
-
-## Adding Sample Data
-
-The fastest way to add data for testing is through the Django admin:
-
-1. Visit `http://127.0.0.1:8000/admin/`
-2. Log in with your superuser account
-3. Add Farms, Ponds, Sensors, Readings, Cameras, Detections, and Alerts
-
----
-
-## Tech Stack
-
-- **Backend**: Django 4.2, Python 3.11
-- **Database**: PostgreSQL 15 (via psycopg2-binary)
-- **Frontend**: Django Templates, Bootstrap 5, Bootstrap Icons
-- **Auth**: Django built-in authentication + Profile model
-- **Containerisation**: Docker + Docker Compose
-
----
-
-## Models Overview
+## 🧠 Models Overview
 
 | Model | Description |
 |---|---|
@@ -170,53 +118,10 @@ The fastest way to add data for testing is through the Django admin:
 
 ---
 
-## 🐳 Docker Setup (Recommended)
+## 🐳 Docker Details (Advanced)
 
-To run the application instantly without installing Python, PostgreSQL, or setting up a virtual environment on your computer, you can use Docker.
+If you are using Docker, here is how the orchestration works behind the scenes:
 
-### Prerequisites
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
-
-### 1. Build and Run the Project
-Open a terminal in the `aquaMonitor` directory and run:
-```bash
-docker compose up --build
-```
-This automatically downloads PostgreSQL, installs Django, configures the database, and starts the server. 
-
-Wait until you see logs indicating the database is ready and the development server is running. Leave this terminal open.
-
-### 2. Setup the Database (First-Time Only)
-Open a **new, separate terminal** inside the same `aquaMonitor` folder to execute the Django setup commands inside your running container:
-
-**Run Migrations:**
-```bash
-docker compose exec web python manage.py makemigrations
-docker compose exec web python manage.py migrate
-```
-
-**Create an Admin Account:**
-```bash
-docker compose exec web python manage.py createsuperuser
-```
-(Enter a username, email, and password when prompted).
-
-### 3. Access the Application
-Open your web browser and navigate to:
-**http://localhost:8000/**
-
-You can access your admin panel at:
-**http://localhost:8000/admin/**
-
-### 4. Stopping the Project
-To safely shut down the server and database, use:
-```bash
-docker compose down
-```
-
-### 5. Resetting the Database
-If you ever want to completely wipe the database clean and start over from scratch, run:
-```bash
-docker compose down -v
-```
-*(This destroys the `postgres_data` volume containing your tables/users).* Then simply run `docker compose up --build` again.
+- **Services**: `docker-compose.yml` runs two container services: `web` (Django + Python 3.11) and `db` (PostgreSQL 15 Alpine).
+- **Environment Automation (`.env`)**: The containers securely inject environment variables directly from inside your `.env` file. Docker automatically intercepts `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` to initialize the database natively without hardcoding secrets.
+- **Volumes**: Your code is mapped via a local volume so Python file changes update instantly (`StatReloader`). Database rows are saved in a durable Docker volume (`postgres_data`) so no information is lost when removing containers.
