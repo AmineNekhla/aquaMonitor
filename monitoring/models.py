@@ -127,7 +127,7 @@ class SensorReading(models.Model):
 
     sensor      = models.ForeignKey(Sensor, on_delete=models.CASCADE, related_name='readings')
     value       = models.DecimalField(max_digits=10, decimal_places=4)
-    recorded_at = models.DateTimeField(auto_now_add=True)
+    recorded_at = models.DateTimeField() #H: removed the auto to accept the time generated
 
     def __str__(self):
         return f"{self.sensor} → {self.value} @ {self.recorded_at:%Y-%m-%d %H:%M}"
