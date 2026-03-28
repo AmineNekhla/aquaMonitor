@@ -23,7 +23,21 @@ docker compose exec web python manage.py createsuperuser
 ```
 *(Enter a username, email, and password when prompted).*
 
-### 3. Access the Application
+### 3. Seed the Database (Populate with Realistic Data)
+Instead of manually adding every farm, pond, and sensor, use the custom seeding script. This generates 30 days of realistic, time-staggered sensor data, including oxygen crashes and automated AI alerts.
+
+```bash
+docker compose exec web python manage.py seed_db --clear
+```
+What this does:
+
+- Creates an admin and 3 farm managers.
+- Sets up 3 unique farms with 9 total ponds (including High-Risk and Healthy zones).
+- Generates sensor readings with realistic daily cycles.
+- Simulates "Stress Events".
+- Runs an initial AI inference to generate health forecasts.
+
+### 4. Access the Application
 - Web Dashboard: **http://localhost:8000/**
 - Admin Panel: **http://localhost:8000/admin/**
 
