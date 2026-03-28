@@ -228,3 +228,36 @@ class Alert(models.Model):
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Alert'
+
+#H: forcastes model (for forcasted data)
+
+class Forecast(models.Model):
+    STATUS_CHOICES = [
+        ('Good', 'Good'),
+        ('Warning', 'Warning'),
+        ('Risk', 'Risk'),
+    ]
+
+    pond        = models.ForeignKey(Pond, on_delete=models.CASCADE, related_name='forecasts')
+    created_at  = models.DateTimeField(auto_now_add=True)  #H: pred time
+    target_time = models.DateTimeField()                    # the future hour (now + N)
+    hour_offset = models.PositiveSmallIntegerField()        # 1 to 6 (the nbr of pred hour) — easier to query
+
+    # Predicted values from LSTM
+    temp    = models.FloatField()
+    do      = models.FloatField()
+    ph      = models.FloatField()
+    ammonia = models.FloatField(default=0.0)               # store current ammonia too
+
+    # Classification from Model 1
+    status  = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    issues  = models.TextField(blank=True, default='')     # use default='' not null=True
+    actions = models.TextField(blank=True, default='')     # Storing the CTA
+
+    class Meta:
+        ordering = ['target_time']
+        # prevent duplicate forecasts for same pond/hour
+        unique_together = ['pond', 'target_time']
+
+    def __str__(self):
+        return f"Forecast {self.pond.name} +{self.hour_offset}h → {self.status}"

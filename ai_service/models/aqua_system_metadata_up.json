@@ -1,0 +1,53 @@
+{
+  "system": "Aqua AI Service",
+  "version": "1.0",
+  "models": {
+    "model1": {
+      "file": "aqua_model1_final.pkl",
+      "scaler": "aqua_scaler_final.pkl",
+      "type": "XGBoost Classifier",
+      "purpose": "Real-time water quality classification",
+      "output": "Good / Warning / Risk",
+      "features": [
+        "Temp",
+        "Turbidity",
+        "DO",
+        "pH",
+        "Ammonia",
+        "Nitrite"
+      ],
+      "accuracy": "98%"
+    },
+    "model2": {
+      "file": "aqua_model2_1hrPred_final.keras",
+      "scaler": "aqua_model2_scaler_1hrPred_final.pkl",
+      "type": "LSTM Forecaster",
+      "purpose": "Predict water parameters 1 hour ahead",
+      "output": "Predicted Temp, DO, pH values",
+      "features": [
+        "temp",
+        "do",
+        "ph",
+        "ammonia"
+      ],
+      "note": "Ammonia prediction replaced by current sensor reading",
+      "forecast_hours": 6,
+      "method": "Recursive multi-step forecasting"
+    }
+  },
+  "pipeline": {
+    "step1": "Current sensor readings by Model 1: Current status + CTA",
+    "step2": "Last 24h history by Model 2: Recursive 6h forecast(it predicts 1hr and concider its data for 5 more predictions)",
+    "step3": "Each predicted hour by Model 1: Future status per hour"
+  },
+  "thresholds": {
+    "DO_critical": 3.5,
+    "DO_warning": 6.0,
+    "Ammonia_critical": 0.5,
+    "Ammonia_warning": 0.2,
+    "pH_critical_low": 6.8,
+    "pH_critical_high": 9.2,
+    "Turbidity_critical": 35,
+    "Nitrite_critical": 2.0
+  }
+}

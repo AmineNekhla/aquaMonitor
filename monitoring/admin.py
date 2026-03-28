@@ -5,7 +5,7 @@ Each model gets useful list_display, list_filter, and search_fields.
 """
 
 from django.contrib import admin
-from .models import Profile, Farm, Pond, Sensor, SensorReading, Camera, AIDetection, Alert
+from .models import Profile, Farm, Pond, Sensor, SensorReading, Camera, AIDetection, Alert, Forecast
 
 
 # ─── Inline: SensorReadings inside Sensor ────────────────────────────────────
@@ -89,3 +89,10 @@ class AlertAdmin(admin.ModelAdmin):
     list_filter   = ('severity', 'status', 'alert_type')
     search_fields = ('title', 'pond__name', 'message')
     readonly_fields = ('created_at',)
+
+
+
+@admin.register(Forecast)
+class ForecastAdmin(admin.ModelAdmin):
+    list_display = ('pond', 'target_time', 'temp', 'status')
+    list_filter = ('status', 'pond')
