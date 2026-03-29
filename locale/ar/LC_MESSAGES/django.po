@@ -1,0 +1,557 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-29 06:13+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#: aquaculture/settings.py:103
+msgid "English"
+msgstr ""
+
+#: aquaculture/settings.py:104
+msgid "French"
+msgstr ""
+
+#: aquaculture/settings.py:105
+msgid "Arabic"
+msgstr ""
+
+#: monitoring/templates/monitoring/alerts.html:4
+#: monitoring/templates/monitoring/base.html:62
+#: monitoring/templates/monitoring/base.html:158
+#: monitoring/templates/monitoring/base.html:350
+#: monitoring/templates/monitoring/dashboard.html:188
+msgid "Alerts"
+msgstr "التنبيهات"
+
+#: monitoring/templates/monitoring/alerts.html:5
+#: monitoring/templates/monitoring/alerts.html:12
+#: monitoring/templates/monitoring/dashboard.html:50
+msgid "Alert Center"
+msgstr "مركز التنبيهات"
+
+#: monitoring/templates/monitoring/alerts.html:13
+msgid "Track and manage all system alerts across your ponds."
+msgstr "تتبع وإدارة جميع تنبيهات النظام في أحواضك."
+
+#: monitoring/templates/monitoring/alerts.html:17
+msgid "Mark all as read"
+msgstr "تحديد الكل كمقروء"
+
+#: monitoring/templates/monitoring/alerts.html:24
+msgid "Filter alerts by status"
+msgstr "تصفية التنبيهات"
+
+#: monitoring/templates/monitoring/alerts.html:26
+#: monitoring/templates/monitoring/ponds.html:21
+msgid "All"
+msgstr "الكل"
+
+#: monitoring/templates/monitoring/alerts.html:29
+#: monitoring/templates/monitoring/alerts.html:69
+#: monitoring/templates/monitoring/alerts.html:92
+#: monitoring/templates/monitoring/alerts.html:146
+msgid "Open"
+msgstr "مفتوح"
+
+#: monitoring/templates/monitoring/alerts.html:32
+#: monitoring/templates/monitoring/alerts.html:94
+msgid "Acknowledged"
+msgstr "تم الاستلام"
+
+#: monitoring/templates/monitoring/alerts.html:35
+#: monitoring/templates/monitoring/alerts.html:96
+msgid "Resolved"
+msgstr "تم الحل"
+
+#: monitoring/templates/monitoring/alerts.html:49
+msgid "Title"
+msgstr "العنوان"
+
+#: monitoring/templates/monitoring/alerts.html:50
+msgid "Pond"
+msgstr "الحوض"
+
+#: monitoring/templates/monitoring/alerts.html:51
+msgid "Farm"
+msgstr "المزرعة"
+
+#: monitoring/templates/monitoring/alerts.html:52
+msgid "Type"
+msgstr "النوع"
+
+#: monitoring/templates/monitoring/alerts.html:53
+msgid "Severity"
+msgstr "الأهمية"
+
+#: monitoring/templates/monitoring/alerts.html:54
+#: monitoring/templates/monitoring/pond_detail.html:277
+msgid "Status"
+msgstr "الحالة"
+
+#: monitoring/templates/monitoring/alerts.html:55
+msgid "Date"
+msgstr "التاريخ"
+
+#: monitoring/templates/monitoring/alerts.html:81
+#: monitoring/templates/monitoring/alerts.html:137
+#: monitoring/templates/monitoring/base.html:254
+#: monitoring/templates/monitoring/dashboard.html:112
+#: monitoring/templates/monitoring/pond_detail.html:39
+#: monitoring/templates/monitoring/pond_detail.html:283
+#: monitoring/templates/monitoring/pond_detail.html:310
+#: monitoring/templates/monitoring/pond_detail.html:367
+#: monitoring/templates/monitoring/ponds.html:30
+#: monitoring/templates/monitoring/ponds.html:67
+msgid "Critical"
+msgstr "حرج"
+
+#: monitoring/templates/monitoring/alerts.html:83
+#: monitoring/templates/monitoring/alerts.html:139
+#: monitoring/templates/monitoring/base.html:256
+#: monitoring/templates/monitoring/pond_detail.html:312
+#: monitoring/templates/monitoring/pond_detail.html:369
+msgid "High"
+msgstr "عالي"
+
+#: monitoring/templates/monitoring/alerts.html:85
+#: monitoring/templates/monitoring/alerts.html:141
+#: monitoring/templates/monitoring/base.html:258
+#: monitoring/templates/monitoring/dashboard.html:110
+#: monitoring/templates/monitoring/pond_detail.html:37
+#: monitoring/templates/monitoring/pond_detail.html:281
+#: monitoring/templates/monitoring/pond_detail.html:371
+#: monitoring/templates/monitoring/ponds.html:27
+#: monitoring/templates/monitoring/ponds.html:63
+msgid "Warning"
+msgstr "تحذير"
+
+#: monitoring/templates/monitoring/alerts.html:87
+#: monitoring/templates/monitoring/alerts.html:143
+#: monitoring/templates/monitoring/base.html:260
+#: monitoring/templates/monitoring/pond_detail.html:373
+msgid "Info"
+msgstr "معلومة"
+
+#: monitoring/templates/monitoring/alerts.html:106
+msgid "Mark as read"
+msgstr "تحديد كمقروء"
+
+#: monitoring/templates/monitoring/alerts.html:148
+msgid "Ack"
+msgstr "تأكيد"
+
+#: monitoring/templates/monitoring/alerts.html:150
+msgid "Done"
+msgstr "تم"
+
+#: monitoring/templates/monitoring/alerts.html:163
+#: monitoring/templates/monitoring/base.html:248
+#: monitoring/templates/monitoring/pond_detail.html:148
+#: monitoring/templates/monitoring/pond_detail.html:323
+#: monitoring/templates/monitoring/pond_detail.html:376
+#: monitoring/templates/monitoring/ponds.html:116
+#, python-format
+msgid "%(time)s ago"
+msgstr "منذ %(time)s"
+
+#: monitoring/templates/monitoring/alerts.html:169
+msgid "View Pond"
+msgstr "عرض الحوض"
+
+#: monitoring/templates/monitoring/alerts.html:191
+msgid "All Clear!"
+msgstr "كل شيء على ما يرام!"
+
+#: monitoring/templates/monitoring/alerts.html:192
+msgid "No alerts found — all ponds are operating normally."
+msgstr "لا توجد تنبيهات — جميع الأحواض تعمل بشكل طبيعي."
+
+#: monitoring/templates/monitoring/alerts.html:194
+msgid "View Ponds"
+msgstr "عرض الأحواض"
+
+#: monitoring/templates/monitoring/base.html:51
+#: monitoring/templates/monitoring/base.html:131
+msgid "Main"
+msgstr "الرئيسية"
+
+#: monitoring/templates/monitoring/base.html:53
+#: monitoring/templates/monitoring/base.html:137
+#: monitoring/templates/monitoring/base.html:326
+#: monitoring/templates/monitoring/dashboard.html:5
+#: monitoring/templates/monitoring/dashboard.html:6
+msgid "Dashboard"
+msgstr "لوحة القيادة"
+
+#: monitoring/templates/monitoring/base.html:56
+#: monitoring/templates/monitoring/base.html:144
+#: monitoring/templates/monitoring/base.html:333
+#: monitoring/templates/monitoring/pond_detail.html:13
+msgid "Farms"
+msgstr "المزارع"
+
+#: monitoring/templates/monitoring/base.html:59
+#: monitoring/templates/monitoring/base.html:151
+#: monitoring/templates/monitoring/base.html:340
+#: monitoring/templates/monitoring/dashboard.html:172
+#: monitoring/templates/monitoring/ponds.html:5
+msgid "Ponds"
+msgstr "الأحواض"
+
+#: monitoring/templates/monitoring/base.html:66
+msgid "Account"
+msgstr "الحساب"
+
+#: monitoring/templates/monitoring/base.html:68
+#: monitoring/templates/monitoring/base.html:171
+#: monitoring/templates/monitoring/base.html:357
+#: monitoring/templates/monitoring/dashboard.html:204
+msgid "Profile"
+msgstr "الملف الشخصي"
+
+#: monitoring/templates/monitoring/base.html:73
+#: monitoring/templates/monitoring/base.html:178
+msgid "Logout"
+msgstr "تسجيل الخروج"
+
+#: monitoring/templates/monitoring/base.html:196
+msgid "Open menu"
+msgstr "فتح القائمة"
+
+#: monitoring/templates/monitoring/base.html:205
+msgid "Switch language"
+msgstr "تغيير اللغة"
+
+#: monitoring/templates/monitoring/base.html:209
+#: monitoring/templates/monitoring/login.html:33
+msgid "Select language"
+msgstr "اختر اللغة"
+
+#: monitoring/templates/monitoring/base.html:220
+#: monitoring/templates/monitoring/base.html:229
+msgid "Notifications"
+msgstr "الإشعارات"
+
+#: monitoring/templates/monitoring/base.html:233
+msgid "Mark all read"
+msgstr ""
+
+#: monitoring/templates/monitoring/base.html:268
+msgid "No new notifications"
+msgstr "لا توجد إشعارات جديدة"
+
+#: monitoring/templates/monitoring/base.html:276
+msgid "View all alerts"
+msgstr "عرض جميع التنبيهات"
+
+#: monitoring/templates/monitoring/dashboard.html:16
+#: monitoring/templates/monitoring/dashboard.html:24
+#: monitoring/templates/monitoring/dashboard.html:32
+#, python-format
+msgid "Last sensor sync: %(time)s ago"
+msgstr "آخر مزامنة: منذ %(time)s"
+
+#: monitoring/templates/monitoring/dashboard.html:41
+#, python-format
+msgid "Welcome back, %(username)s"
+msgstr "مرحباً بعودتك، %(username)s"
+
+#: monitoring/templates/monitoring/dashboard.html:43
+msgid "Smart Aquaculture Command Center"
+msgstr "مركز القيادة الذكي لتربية الأحياء المائية"
+
+#: monitoring/templates/monitoring/dashboard.html:44
+msgid ""
+"Monitor your farms, track real-time water quality, and respond to alerts — "
+"all in one place."
+msgstr ""
+
+#: monitoring/templates/monitoring/dashboard.html:47
+#: monitoring/templates/monitoring/ponds.html:6
+#: monitoring/templates/monitoring/ponds.html:13
+msgid "Ponds Overview"
+msgstr "نظرة عامة على الأحواض"
+
+#: monitoring/templates/monitoring/dashboard.html:57
+msgid "System Overview"
+msgstr "نظرة عامة على النظام"
+
+#: monitoring/templates/monitoring/dashboard.html:70
+msgid "Total Fish Stock"
+msgstr "إجمالي مخزون الأسماك"
+
+#: monitoring/templates/monitoring/dashboard.html:88
+msgid "Active Alerts"
+msgstr "التنبيهات النشطة"
+
+#: monitoring/templates/monitoring/dashboard.html:108
+msgid "Good"
+msgstr "جيد"
+
+#: monitoring/templates/monitoring/dashboard.html:115
+msgid "Water Quality Index"
+msgstr "مؤشر جودة المياه"
+
+#: monitoring/templates/monitoring/dashboard.html:136
+msgid "Equipment Status"
+msgstr "حالة المعدات"
+
+#: monitoring/templates/monitoring/dashboard.html:145
+msgid "Quick Access"
+msgstr "وصول سريع"
+
+#: monitoring/templates/monitoring/dashboard.html:156
+msgid "My Farms"
+msgstr "مزارعي"
+
+#: monitoring/templates/monitoring/dashboard.html:157
+msgid "Manage all sites"
+msgstr "إدارة جميع المواقع"
+
+#: monitoring/templates/monitoring/dashboard.html:173
+msgid "View water quality"
+msgstr "رؤية جودة المياه"
+
+#: monitoring/templates/monitoring/dashboard.html:189
+msgid "Resolve issues"
+msgstr "حل المشاكل"
+
+#: monitoring/templates/monitoring/dashboard.html:205
+msgid "Settings & account"
+msgstr "الإعدادات والحساب"
+
+#: monitoring/templates/monitoring/login.html:8
+msgid ""
+"AquaMonitor — Smart Aquaculture Monitoring System. Sign in to access your "
+"dashboard."
+msgstr ""
+
+#: monitoring/templates/monitoring/login.html:9
+#: monitoring/templates/monitoring/login.html:138
+msgid "Sign In"
+msgstr "تسجيل الدخول"
+
+#: monitoring/templates/monitoring/login.html:74
+msgid "Smart Aquaculture Monitoring"
+msgstr "المراقبة الذكية لتربية الأحياء المائية"
+
+#: monitoring/templates/monitoring/login.html:83
+msgid "Invalid username or password. Please try again."
+msgstr "اسم المستخدم أو كلمة المرور غير صالحة."
+
+#: monitoring/templates/monitoring/login.html:95
+msgid "Username"
+msgstr "اسم المستخدم"
+
+#: monitoring/templates/monitoring/login.html:102
+msgid "Enter your username"
+msgstr "أدخل اسم المستخدم"
+
+#: monitoring/templates/monitoring/login.html:112
+msgid "Password"
+msgstr "كلمة المرور"
+
+#: monitoring/templates/monitoring/login.html:119
+msgid "Enter your password"
+msgstr "أدخل كلمة المرور"
+
+#: monitoring/templates/monitoring/login.html:126
+msgid "Toggle password visibility"
+msgstr ""
+
+#: monitoring/templates/monitoring/login.html:145
+msgid "AquaMonitor v1.0 — For authorized personnel only."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:5
+msgid "Live Monitor"
+msgstr "مراقب مباشر"
+
+#: monitoring/templates/monitoring/pond_detail.html:35
+#: monitoring/templates/monitoring/pond_detail.html:279
+#: monitoring/templates/monitoring/ponds.html:24
+#: monitoring/templates/monitoring/ponds.html:59
+msgid "Normal"
+msgstr "طبيعي"
+
+#: monitoring/templates/monitoring/pond_detail.html:42
+#, python-format
+msgid "Updated %(time)s ago"
+msgstr "تم التحديث منذ %(time)s"
+
+#: monitoring/templates/monitoring/pond_detail.html:65
+msgid "AI Active"
+msgstr "الذكاء الاصطناعي نشط"
+
+#: monitoring/templates/monitoring/pond_detail.html:73
+msgid "OFFLINE"
+msgstr "غير متصل"
+
+#: monitoring/templates/monitoring/pond_detail.html:86
+msgid "No Live Stream"
+msgstr "لا يوجد بث مباشر"
+
+#: monitoring/templates/monitoring/pond_detail.html:87
+msgid "Configure a camera with .mp4 or .m3u8 URL."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:102
+msgid "IoT Readings"
+msgstr "قراءات IoT"
+
+#: monitoring/templates/monitoring/pond_detail.html:106
+msgid "Live"
+msgstr "مباشر"
+
+#: monitoring/templates/monitoring/pond_detail.html:144
+#: monitoring/templates/monitoring/pond_detail.html:183
+msgid "N/A"
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:157
+msgid "No IoT sensors linked."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:188
+msgid "No sensors linked."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:204
+msgid "24-Hour Sensor Trend"
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:205
+msgid "Temp & DO"
+msgstr "الحرارة والأكسجين"
+
+#: monitoring/templates/monitoring/pond_detail.html:219
+msgid "Quick Actions"
+msgstr "إجراءات سريعة"
+
+#: monitoring/templates/monitoring/pond_detail.html:228
+msgid "Emergency Aerator"
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:235
+msgid "Generate 24hr Report"
+msgstr "إنشاء تقرير 24 ساعة"
+
+#: monitoring/templates/monitoring/pond_detail.html:244
+msgid "Calibrate Sensors"
+msgstr "معايرة المستشعرات"
+
+#: monitoring/templates/monitoring/pond_detail.html:261
+msgid "Pond Overview"
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:267
+msgid "Fish Species"
+msgstr "أنواع الأسماك"
+
+#: monitoring/templates/monitoring/pond_detail.html:272
+msgid "Fish Count"
+msgstr "عدد الأسماك"
+
+#: monitoring/templates/monitoring/pond_detail.html:288
+msgid "Last Updated"
+msgstr "آخر تحديث"
+
+#: monitoring/templates/monitoring/pond_detail.html:300
+msgid "AI Detections"
+msgstr "اكتشافات الذكاء الاصطناعي"
+
+#: monitoring/templates/monitoring/pond_detail.html:314
+msgid "Medium"
+msgstr "متوسط"
+
+#: monitoring/templates/monitoring/pond_detail.html:316
+msgid "Low"
+msgstr "منخفض"
+
+#: monitoring/templates/monitoring/pond_detail.html:324
+#, python-format
+msgid "%(conf)s conf"
+msgstr "%(conf)s ثقة"
+
+#: monitoring/templates/monitoring/pond_detail.html:332
+msgid "No AI detections recorded."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:343
+msgid "Recent Alerts"
+msgstr "التنبيهات الأخيرة"
+
+#: monitoring/templates/monitoring/pond_detail.html:345
+msgid "View All"
+msgstr "عرض الكل"
+
+#: monitoring/templates/monitoring/pond_detail.html:358
+msgid "OPEN"
+msgstr "مفتوح"
+
+#: monitoring/templates/monitoring/pond_detail.html:384
+msgid "No alerts for this pond."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:449
+msgid "Temperature (°C)"
+msgstr "الحرارة (°C)"
+
+#: monitoring/templates/monitoring/pond_detail.html:462
+msgid "Dissolved Oxygen (mg/L)"
+msgstr "الأكسجين المذاب (mg/L)"
+
+#: monitoring/templates/monitoring/ponds.html:14
+msgid "Real-time water quality monitoring for all your ponds."
+msgstr ""
+
+#: monitoring/templates/monitoring/ponds.html:19
+msgid "Filter ponds by status"
+msgstr ""
+
+#: monitoring/templates/monitoring/ponds.html:78
+msgid "Sensor trend chart"
+msgstr ""
+
+#: monitoring/templates/monitoring/ponds.html:95
+msgid "Temp"
+msgstr "الحرارة"
+
+#: monitoring/templates/monitoring/ponds.html:112
+#, python-format
+msgid "%(fcount)s fish"
+msgstr "%(fcount)s سمكة"
+
+#: monitoring/templates/monitoring/ponds.html:124
+msgid "View Live Monitor"
+msgstr "عرض مباشر"
+
+#: monitoring/templates/monitoring/ponds.html:138
+msgid "No Ponds Found"
+msgstr "لا توجد أحواض"
+
+#: monitoring/templates/monitoring/ponds.html:139
+msgid ""
+"You haven't added any ponds to your farms yet. Start by creating a farm "
+"first."
+msgstr ""
+
+#: monitoring/templates/monitoring/ponds.html:141
+msgid "Go to Farms"
+msgstr "الذهاب إلى المزارع"

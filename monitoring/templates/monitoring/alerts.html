@@ -1,88 +1,254 @@
 {% extends 'monitoring/base.html' %}
+{% load i18n %}
 
-{% block title %}Alerts – AquaMonitor{% endblock %}
-{% block page_title %}Alerts{% endblock %}
+{% block title %}{% trans "Alerts" %} — AquaMonitor{% endblock %}
+{% block page_title %}{% trans "Alert Center" %}{% endblock %}
 
 {% block content %}
 
-<div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center">
-    <span class="fw-semibold"><i class="bi bi-bell me-2"></i>All Alerts ({{ alerts|length }})</span>
-    {% if alerts %}
-    <a href="{% url 'mark_all_alerts_read' %}" class="btn btn-sm btn-outline-teal">
-      <i class="bi bi-check2-all me-1"></i>Mark all as read
-    </a>
-    {% endif %}
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>{% trans "Alert Center" %}</h1>
+    <p>{% trans "Track and manage all system alerts across your ponds." %}</p>
   </div>
-  <div class="card-body p-0">
-    {% if alerts %}
-    <table class="table table-hover mb-0">
-      <thead class="table-light">
-        <tr>
-          <th>#</th>
-          <th>Title</th>
-          <th>Pond</th>
-          <th>Farm</th>
-          <th>Type</th>
-          <th>Severity</th>
-          <th>Status</th>
-          <th>Message</th>
-          <th>Date</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for alert in alerts %}
-        <tr>
-          <td class="text-muted">{{ forloop.counter }}</td>
-          <td class="fw-medium">{{ alert.title }}</td>
-          <td>
-            <a href="{% url 'pond_detail' alert.pond.id %}">{{ alert.pond.name }}</a>
-          </td>
-          <td>{{ alert.pond.farm.name }}</td>
-          <td class="text-muted small">{{ alert.get_alert_type_display }}</td>
-          <td>
-            {% if alert.severity == 'critical' %}
-              <span class="badge bg-danger">Critical</span>
-            {% elif alert.severity == 'high' %}
-              <span class="badge bg-orange text-white">High</span>
-            {% elif alert.severity == 'warning' %}
-              <span class="badge bg-warning text-dark">Warning</span>
-            {% else %}
-              <span class="badge bg-info text-dark">Info</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if alert.status == 'open' %}
-              <span class="badge bg-danger-soft text-danger border border-danger">Open</span>
-            {% elif alert.status == 'acknowledged' %}
-              <span class="badge bg-warning-soft text-warning border border-warning">Acknowledged</span>
-            {% else %}
-              <span class="badge bg-success-soft text-success border border-success">Resolved</span>
-            {% endif %}
-          </td>
-          <td class="text-muted small" style="max-width:200px;">
-            {{ alert.message|truncatechars:80 }}
-          </td>
-          <td class="text-muted small text-nowrap">{{ alert.created_at|date:"d M Y H:i" }}</td>
-          <td>
-            {% if alert.status == 'open' %}
-            <a href="{% url 'mark_alert_read' alert.id %}" class="btn btn-sm btn-light" title="Mark as read" data-bs-toggle="tooltip">
-              <i class="bi bi-check-circle text-success fs-6"></i>
-            </a>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="text-center py-5 text-muted">
-      <i class="bi bi-check-circle fs-2 d-block mb-2 text-success"></i>
-      No alerts found — all ponds are operating normally!
-    </div>
-    {% endif %}
-  </div>
+  {% if alerts %}
+  <a href="{% url 'mark_all_alerts_read' %}" class="btn-ghost" id="btn-mark-all-read">
+    <i class="bi bi-check2-all"></i> {% trans "Mark all as read" %}
+  </a>
+  {% endif %}
 </div>
 
+<!-- Filter Pills -->
+{% if alerts %}
+<div class="filter-pills mb-4" id="alert-filters" role="tablist" aria-label="{% trans 'Filter alerts by status' %}">
+  <button class="filter-pill active" data-filter="all" aria-selected="true">
+    <i class="bi bi-list-ul"></i> {% trans "All" %} <span class="count">{{ alerts|length }}</span>
+  </button>
+  <button class="filter-pill" data-filter="open">
+    <i class="bi bi-circle-fill" style="font-size:0.5rem;"></i> {% trans "Open" %}
+  </button>
+  <button class="filter-pill" data-filter="acknowledged">
+    <i class="bi bi-eye"></i> {% trans "Acknowledged" %}
+  </button>
+  <button class="filter-pill" data-filter="resolved">
+    <i class="bi bi-check-circle"></i> {% trans "Resolved" %}
+  </button>
+</div>
+{% endif %}
+
+{% if alerts %}
+
+  <!-- ── DESKTOP TABLE (hidden on mobile) ─────────────────── -->
+  <div class="card border-0 alerts-table-wrapper">
+    <div class="table-scroll-mobile">
+      <table class="table table-custom mb-0" style="font-family: 'Inter', sans-serif;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{% trans "Title" %}</th>
+            <th>{% trans "Pond" %}</th>
+            <th>{% trans "Farm" %}</th>
+            <th>{% trans "Type" %}</th>
+            <th>{% trans "Severity" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "Date" %}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="alerts-table-body">
+          {% for alert in alerts %}
+          <tr class="alert-table-row" data-status="{{ alert.status }}"
+              onclick="window.location='{% url 'pond_detail' alert.pond.id %}'"
+              style="cursor: pointer;">
+            <td style="color:#94a3b8; font-size:0.8rem;">{{ forloop.counter }}</td>
+            <td>
+              <span style="font-weight:600; font-size:0.875rem; color:#1a2744;">{{ alert.title }}</span>
+              {% if alert.status == 'open' %}
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #ef4444;
+                             display: inline-block; margin-left: 6px;" title="{% trans 'Open' %}"></span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'pond_detail' alert.pond.id %}"
+                 style="color:#2e5090; font-weight:500; font-size:0.875rem;"
+                 onclick="event.stopPropagation();">{{ alert.pond.name }}</a>
+            </td>
+            <td style="color:#64748b; font-size:0.85rem;">{{ alert.pond.farm.name }}</td>
+            <td style="color:#64748b; font-size:0.8rem;">{{ alert.get_alert_type_display }}</td>
+            <td>
+              {% if alert.severity == 'critical' %}
+                <span class="badge-status badge-critical">{% trans "Critical" %}</span>
+              {% elif alert.severity == 'high' %}
+                <span class="badge-status badge-high">{% trans "High" %}</span>
+              {% elif alert.severity == 'warning' %}
+                <span class="badge-status badge-warning">{% trans "Warning" %}</span>
+              {% else %}
+                <span class="badge-status badge-info">{% trans "Info" %}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if alert.status == 'open' %}
+                <span class="badge-status badge-open">{% trans "Open" %}</span>
+              {% elif alert.status == 'acknowledged' %}
+                <span class="badge-status badge-ack">{% trans "Acknowledged" %}</span>
+              {% else %}
+                <span class="badge-status badge-resolved">{% trans "Resolved" %}</span>
+              {% endif %}
+            </td>
+            <td style="color:#94a3b8; font-size:0.8rem; white-space:nowrap;">
+              {{ alert.created_at|date:"d M Y H:i" }}
+            </td>
+            <td onclick="event.stopPropagation();">
+              {% if alert.status == 'open' %}
+              <a href="{% url 'mark_alert_read' alert.id %}"
+                 class="btn-ghost" style="padding: 0.3rem 0.7rem; min-height: unset; font-size:0.78rem; border-radius: 8px;"
+                 title="{% trans 'Mark as read' %}">
+                <i class="bi bi-check-lg" style="color:#10b981;"></i>
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── MOBILE CARD LIST (hidden on desktop) ──────────────── -->
+  <div class="alerts-card-list" id="alerts-card-list" style="display: none; flex-direction: column; gap: 0.75rem;">
+    {% for alert in alerts %}
+    <div class="alert-card sev-{{ alert.severity }} mobile-alert-row" data-status="{{ alert.status }}"
+         style="padding: 1rem;">
+      <!-- Header row -->
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:0.9rem; font-weight:700; color:#1a2744; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            {{ alert.title }}
+          </div>
+          <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">
+            <i class="bi bi-droplet-half me-1" style="color:#45B1E8;"></i>{{ alert.pond.name }}
+            <span style="margin: 0 4px; color:#cbd5e1;">·</span>
+            {{ alert.pond.farm.name }}
+          </div>
+        </div>
+        <div style="flex-shrink:0; margin-left:0.75rem; display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+          {% if alert.severity == 'critical' %}
+            <span class="badge-status badge-critical">{% trans "Critical" %}</span>
+          {% elif alert.severity == 'high' %}
+            <span class="badge-status badge-high">{% trans "High" %}</span>
+          {% elif alert.severity == 'warning' %}
+            <span class="badge-status badge-warning">{% trans "Warning" %}</span>
+          {% else %}
+            <span class="badge-status badge-info">{% trans "Info" %}</span>
+          {% endif %}
+          {% if alert.status == 'open' %}
+            <span class="badge-status badge-open" style="font-size:0.6rem;">{% trans "Open" %}</span>
+          {% elif alert.status == 'acknowledged' %}
+            <span class="badge-status badge-ack" style="font-size:0.6rem;">{% trans "Ack" %}</span>
+          {% else %}
+            <span class="badge-status badge-resolved" style="font-size:0.6rem;">{% trans "Done" %}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Message snippet -->
+      <div style="font-size:0.8rem; color:#64748b; margin-bottom:0.75rem; line-height:1.5;">
+        {{ alert.message|truncatechars:80 }}
+      </div>
+
+      <!-- Footer -->
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.72rem; color:#94a3b8;">
+          <i class="bi bi-clock me-1"></i>{% blocktrans with time=alert.created_at|timesince %}{{ time }} ago{% endblocktrans %}
+        </span>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <a href="{% url 'pond_detail' alert.pond.id %}"
+             class="btn-outline-primary-custom"
+             style="padding:0.3rem 0.8rem; font-size:0.78rem; min-height:unset; border-radius:8px;">
+            {% trans "View Pond" %}
+          </a>
+          {% if alert.status == 'open' %}
+          <a href="{% url 'mark_alert_read' alert.id %}"
+             class="btn-ghost"
+             style="padding:0.3rem 0.7rem; font-size:0.78rem; min-height:unset; border-radius:8px;">
+            <i class="bi bi-check-lg" style="color:#10b981;"></i>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+{% else %}
+<!-- Empty State -->
+<div class="card border-0">
+  <div class="empty-state">
+    <div class="empty-state-icon" style="background:#f0fdf4; color:#10b981;">
+      <i class="bi bi-check2-circle"></i>
+    </div>
+    <h4>{% trans "All Clear!" %}</h4>
+    <p>{% trans "No alerts found — all ponds are operating normally." %}</p>
+    <a href="{% url 'ponds_list' %}" class="btn-primary-custom mt-2">
+      <i class="bi bi-grid"></i> {% trans "View Ponds" %}
+    </a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  // ── Filter pills ────────────────────────────────────────────
+  const pills    = document.querySelectorAll('[id="alert-filters"] .filter-pill');
+  const tableRows = document.querySelectorAll('.alert-table-row');
+  const cardRows  = document.querySelectorAll('.mobile-alert-row');
+
+  pills.forEach(pill => {
+    pill.addEventListener('click', function() {
+      pills.forEach(p => { p.classList.remove('active'); p.setAttribute('aria-selected','false'); });
+      this.classList.add('active');
+      this.setAttribute('aria-selected','true');
+
+      const filter = this.getAttribute('data-filter');
+
+      // Filter table rows
+      tableRows.forEach(row => {
+        const st = row.getAttribute('data-status');
+        row.style.display = (filter === 'all' || st === filter) ? '' : 'none';
+      });
+
+      // Filter card rows
+      cardRows.forEach(card => {
+        const st = card.getAttribute('data-status');
+        card.style.display = (filter === 'all' || st === filter) ? '' : 'none';
+      });
+    });
+  });
+
+  // ── Show cards vs table based on viewport ──────────────────
+  function toggleLayout() {
+    const isMobile = window.innerWidth < 768;
+    const tableWrapper = document.querySelector('.alerts-table-wrapper');
+    const cardList     = document.getElementById('alerts-card-list');
+
+    if (!tableWrapper || !cardList) return;
+
+    if (isMobile) {
+      tableWrapper.style.display = 'none';
+      cardList.style.display = 'flex';
+    } else {
+      tableWrapper.style.display = '';
+      cardList.style.display = 'none';
+    }
+  }
+
+  toggleLayout();
+  window.addEventListener('resize', toggleLayout);
+});
+</script>
 {% endblock %}

@@ -1,178 +1,366 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AquaMonitor — Smart Aquaculture Monitoring System" />
   <title>{% block title %}AquaMonitor{% endblock %}</title>
 
-  <!-- Bootstrap 5 CSS (CDN) -->
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-  <!-- Our custom CSS -->
+  <!-- AquaMonitor Design System -->
   <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+
+  {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-<!-- ── Sidebar + Main Layout ────────────────────────────────────────────── -->
-<div class="wrapper d-flex">
-
-  <!-- SIDEBAR -->
-  <nav id="sidebar" class="sidebar d-flex flex-column">
-    <!-- Logo / Brand -->
-    <div class="sidebar-header">
-      <i class="bi bi-water me-2"></i>
-      <span>AquaMonitor</span>
+<!-- ══════════════════════════════════════════════════════
+     MOBILE OFF-CANVAS SIDEBAR
+═══════════════════════════════════════════════════════════ -->
+<div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel"
+     style="width: 260px; background: #1a2e52; color: #cbd5e1;">
+  <div class="offcanvas-header" style="border-bottom: 1px solid rgba(255,255,255,0.07);">
+    <!-- Logo -->
+    <div class="d-flex align-items-center gap-2" id="mobileSidebarLabel">
+      <svg width="34" height="34" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="AquaMonitor logo">
+        <circle cx="20" cy="20" r="20" fill="#2e5090"/>
+        <path d="M20 8 C14 14 10 18 10 22 C10 27.5 14.5 32 20 32 C25.5 32 30 27.5 30 22 C30 18 26 14 20 8Z" fill="#45B1E8" opacity="0.9"/>
+        <path d="M16 22 Q18 19 20 22 Q22 25 24 22" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.85"/>
+        <circle cx="20" cy="17" r="2" fill="white" opacity="0.6"/>
+      </svg>
+      <div>
+        <div style="font-size:1rem; font-weight:800; color:#fff; line-height:1.1;">AquaMonitor</div>
+        <div style="font-size:0.58rem; color:#45B1E8; font-weight:600; letter-spacing:0.1em; text-transform:uppercase;">Smart Monitoring</div>
+      </div>
     </div>
-
-    <!-- Navigation links -->
-    <ul class="nav flex-column flex-grow-1 px-2">
-
-      <li class="nav-item">
-        <a href="{% url 'dashboard' %}"
-           class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-          <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a href="{% url 'farms_list' %}"
-           class="nav-link {% if 'farm' in request.resolver_match.url_name %}active{% endif %}">
-          <i class="bi bi-geo-alt"></i> Farms
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a href="{% url 'ponds_list' %}"
-           class="nav-link {% if 'pond' in request.resolver_match.url_name %}active{% endif %}">
-          <i class="bi bi-droplet-half"></i> Ponds
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a href="{% url 'alerts_list' %}"
-           class="nav-link {% if request.resolver_match.url_name == 'alerts_list' %}active{% endif %}">
-          <i class="bi bi-bell"></i> Alerts
-        </a>
-      </li>
-
-    </ul>
-
-    <!-- Bottom: Profile + Logout -->
-    <div class="sidebar-footer px-2 pb-3">
-      <a href="{% url 'profile' %}"
-         class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-        <i class="bi bi-person-circle"></i> Profile
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body p-0">
+    <div style="padding: 0.5rem 0.75rem;">
+      <!-- Main nav -->
+      <div style="font-size:0.62rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.3); padding:0.75rem 0.75rem 0.35rem;">{% trans "Main" %}</div>
+      <a href="{% url 'dashboard' %}" class="sidebar-mobile-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-speedometer2"></i> {% trans "Dashboard" %}
       </a>
-      <form method="post" action="{% url 'logout' %}" class="mt-1">
+      <a href="{% url 'farms_list' %}" class="sidebar-mobile-link {% if 'farm' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-geo-alt"></i> {% trans "Farms" %}
+      </a>
+      <a href="{% url 'ponds_list' %}" class="sidebar-mobile-link {% if 'pond' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-droplet-half"></i> {% trans "Ponds" %}
+      </a>
+      <a href="{% url 'alerts_list' %}" class="sidebar-mobile-link {% if request.resolver_match.url_name == 'alerts_list' %}active{% endif %}">
+        <i class="bi bi-bell"></i> {% trans "Alerts" %}
+        {% if unread_alert_count > 0 %}<span class="alert-badge">{{ unread_alert_count }}</span>{% endif %}
+      </a>
+      <!-- Account -->
+      <div style="font-size:0.62rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.3); padding:0.75rem 0.75rem 0.35rem; margin-top:0.5rem;">{% trans "Account" %}</div>
+      <a href="{% url 'profile' %}" class="sidebar-mobile-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+        <i class="bi bi-person-circle"></i> {% trans "Profile" %}
+      </a>
+      <form method="post" action="{% url 'logout' %}" class="m-0">
         {% csrf_token %}
-        <button type="submit" class="nav-link text-danger border-0 bg-transparent w-100 text-start px-0">
-          <i class="bi bi-box-arrow-right"></i> Logout
+        <button type="submit" class="sidebar-mobile-link w-100 text-start" style="background:none; border:none; color:#f87171; cursor:pointer;">
+          <i class="bi bi-box-arrow-right"></i> {% trans "Logout" %}
         </button>
       </form>
     </div>
+  </div>
+</div>
+
+<style>
+.sidebar-mobile-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-bottom: 2px;
+  font-family: 'Inter', sans-serif;
+}
+.sidebar-mobile-link:hover { background: rgba(69,177,232,0.15); color: #e2e8f0; }
+.sidebar-mobile-link.active { background: rgba(69,177,232,0.25); color: #45B1E8; font-weight: 600; }
+.sidebar-mobile-link .alert-badge {
+  margin-left: auto; background: #ef4444; color: #fff;
+  font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 10px;
+}
+</style>
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN LAYOUT WRAPPER
+═══════════════════════════════════════════════════════════ -->
+<div class="wrapper">
+
+  <!-- ────────────────────────────────────────────────────
+       DESKTOP SIDEBAR
+  ───────────────────────────────────────────────────────── -->
+  <nav id="sidebar" class="sidebar d-none d-md-flex flex-column" aria-label="Main navigation">
+
+    <!-- Brand -->
+    <a href="{% url 'dashboard' %}" class="sidebar-brand" aria-label="AquaMonitor Home">
+      <div class="sidebar-brand-icon">
+        <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="20" cy="20" r="20" fill="#2e5090"/>
+          <path d="M20 8 C14 14 10 18 10 22 C10 27.5 14.5 32 20 32 C25.5 32 30 27.5 30 22 C30 18 26 14 20 8Z" fill="#45B1E8" opacity="0.9"/>
+          <path d="M16 22 Q18 19 20 22 Q22 25 24 22" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.85"/>
+          <circle cx="20" cy="17" r="2" fill="white" opacity="0.6"/>
+        </svg>
+      </div>
+      <div class="sidebar-brand-text">
+        <span class="sidebar-brand-name">AquaMonitor</span>
+        <span class="sidebar-brand-tagline">Smart Monitoring</span>
+      </div>
+    </a>
+
+    <!-- Main Navigation -->
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">{% trans "Main" %}</div>
+
+      <a href="{% url 'dashboard' %}"
+         class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+         id="nav-dashboard">
+        <i class="bi bi-speedometer2 nav-icon"></i>
+        <span class="nav-label">{% trans "Dashboard" %}</span>
+      </a>
+
+      <a href="{% url 'farms_list' %}"
+         class="nav-link {% if 'farm' in request.resolver_match.url_name %}active{% endif %}"
+         id="nav-farms">
+        <i class="bi bi-geo-alt nav-icon"></i>
+        <span class="nav-label">{% trans "Farms" %}</span>
+      </a>
+
+      <a href="{% url 'ponds_list' %}"
+         class="nav-link {% if 'pond' in request.resolver_match.url_name %}active{% endif %}"
+         id="nav-ponds">
+        <i class="bi bi-droplet-half nav-icon"></i>
+        <span class="nav-label">{% trans "Ponds" %}</span>
+      </a>
+
+      <a href="{% url 'alerts_list' %}"
+         class="nav-link {% if request.resolver_match.url_name == 'alerts_list' %}active{% endif %}"
+         id="nav-alerts">
+        <i class="bi bi-bell nav-icon"></i>
+        <span class="nav-label">{% trans "Alerts" %}</span>
+        {% if unread_alert_count > 0 %}
+          <span class="alert-badge">{{ unread_alert_count }}</span>
+        {% endif %}
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <a href="{% url 'profile' %}"
+         class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"
+         id="nav-profile">
+        <i class="bi bi-person-circle nav-icon"></i>
+        <span class="nav-label">{% trans "Profile" %}</span>
+      </a>
+
+      <form method="post" action="{% url 'logout' %}" class="m-0">
+        {% csrf_token %}
+        <button type="submit" class="btn-logout" id="btn-sidebar-logout">
+          <i class="bi bi-box-arrow-right nav-icon"></i>
+          <span class="nav-label">{% trans "Logout" %}</span>
+        </button>
+      </form>
+    </div>
+
   </nav>
-  <!-- END SIDEBAR -->
+  <!-- END DESKTOP SIDEBAR -->
 
-  <!-- MAIN CONTENT AREA -->
-  <div class="main-content flex-grow-1">
+  <!-- ────────────────────────────────────────────────────
+       MAIN CONTENT AREA
+  ───────────────────────────────────────────────────────── -->
+  <div class="main-content">
 
-    <!-- Top bar -->
-    <header class="topbar d-flex align-items-center justify-content-between px-4">
-      <h6 class="mb-0 fw-semibold">{% block page_title %}Dashboard{% endblock %}</h6>
-      
-      <div class="d-flex align-items-center gap-4">
-        <!-- Notification Dropdown -->
+    <!-- TOPBAR -->
+    <header class="topbar" role="banner">
+      <div class="topbar-left">
+        <!-- Hamburger (mobile only) -->
+        <button class="btn-hamburger" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar"
+                aria-controls="mobileSidebar" aria-label="{% trans 'Open menu' %}">
+          <i class="bi bi-list"></i>
+        </button>
+        <h1 class="topbar-page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+      </div>
+
+      <div class="topbar-right">
+
+        <!-- Language Switcher -->
+        <div class="lang-switcher" title="{% trans 'Switch language' %}">
+          <form action="{% url 'set_language' %}" method="post">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.path }}">
+            <select name="language" onchange="this.form.submit()" aria-label="{% trans 'Select language' %}">
+              <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>🇬🇧 EN</option>
+              <option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>🇫🇷 FR</option>
+              <option value="ar" {% if LANGUAGE_CODE == 'ar' %}selected{% endif %}>🇸🇦 AR</option>
+            </select>
+          </form>
+        </div>
+
+        <!-- Notification Bell -->
         <div class="dropdown">
-          <a class="text-secondary position-relative text-decoration-none" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-bell fs-5"></i>
+          <button class="btn-notif" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                  aria-label="{% trans 'Notifications' %}" id="notif-bell-btn">
+            <i class="bi bi-bell"></i>
             {% if unread_alert_count > 0 %}
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
-              {{ unread_alert_count }}
-              <span class="visually-hidden">unread alerts</span>
-            </span>
+              <span class="notif-badge">{{ unread_alert_count }}</span>
             {% endif %}
-          </a>
-          
-          <div class="dropdown-menu dropdown-menu-end shadow p-0" style="width: 340px; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; margin-top: 10px;">
-            <div class="bg-light d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
-              <span class="fw-semibold small">Notifications</span>
+          </button>
+
+          <div class="dropdown-menu notif-dropdown p-0" aria-labelledby="notif-bell-btn">
+            <div class="notif-dropdown-header">
+              <span>{% trans "Notifications" %}</span>
               {% if unread_alert_count > 0 %}
-              <a href="{% url 'mark_all_alerts_read' %}" class="small text-teal text-decoration-none" title="Mark all as read">
-                <i class="bi bi-check2-all"></i> Mark all read
+              <a href="{% url 'mark_all_alerts_read' %}" class="text-decoration-none"
+                 style="font-size:0.78rem; color:#45B1E8; font-weight:600;">
+                <i class="bi bi-check2-all me-1"></i>{% trans "Mark all read" %}
               </a>
               {% endif %}
             </div>
-            
-            <div class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
+
+            <div style="max-height: 340px; overflow-y: auto;">
               {% if recent_alerts %}
                 {% for alert in recent_alerts %}
-                  <a href="{% url 'pond_detail' alert.pond.id %}" class="list-group-item list-group-item-action px-3 py-2 {% if alert.status == 'open' %}bg-primary-subtle border-start border-primary border-4{% else %}border-start border-transparent border-4{% endif %}">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                      <span class="fw-semibold small text-truncate" style="max-width: 65%;">{{ alert.title }}</span>
-                      <small class="text-muted" style="font-size: 0.70rem;">{{ alert.created_at|timesince }} ago</small>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-end">
-                      <div class="small text-muted text-truncate" style="max-width: 70%;">{{ alert.pond.name }}</div>
-                      <div>
-                        {% if alert.severity == 'critical' %}
-                          <span class="badge bg-danger" style="font-size: 0.65rem;">Critical</span>
-                        {% elif alert.severity == 'high' %}
-                          <span class="badge bg-orange text-white" style="font-size: 0.65rem;">High</span>
-                        {% elif alert.severity == 'warning' %}
-                          <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Warning</span>
-                        {% else %}
-                          <span class="badge bg-info text-dark" style="font-size: 0.65rem;">Info</span>
-                        {% endif %}
-                      </div>
-                    </div>
-                  </a>
+                <a href="{% url 'pond_detail' alert.pond.id %}"
+                   class="notif-item {% if alert.status == 'open' %}unread{% endif %}">
+                  <div class="d-flex justify-content-between align-items-start mb-1">
+                    <span class="fw-600" style="font-size:0.82rem; max-width:65%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                      {{ alert.title }}
+                    </span>
+                    <span style="font-size:0.67rem; color:#94a3b8; white-space:nowrap; margin-left:0.5rem;">
+                      {% blocktrans with time=alert.created_at|timesince %}{{ time }} ago{% endblocktrans %}
+                    </span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span style="font-size:0.75rem; color:#64748b;">{{ alert.pond.name }}</span>
+                    {% if alert.severity == 'critical' %}
+                      <span class="badge-status badge-critical" style="font-size:0.6rem; padding:2px 7px;">{% trans "Critical" %}</span>
+                    {% elif alert.severity == 'high' %}
+                      <span class="badge-status badge-high" style="font-size:0.6rem; padding:2px 7px;">{% trans "High" %}</span>
+                    {% elif alert.severity == 'warning' %}
+                      <span class="badge-status badge-warning" style="font-size:0.6rem; padding:2px 7px;">{% trans "Warning" %}</span>
+                    {% else %}
+                      <span class="badge-status badge-info" style="font-size:0.6rem; padding:2px 7px;">{% trans "Info" %}</span>
+                    {% endif %}
+                  </div>
+                </a>
                 {% endfor %}
               {% else %}
-                <div class="text-center p-4 text-muted small">
-                  <i class="bi bi-bell-slash fs-4 d-block mb-1 text-secondary"></i>
-                  No new notifications
-                </div>
+              <div class="empty-state" style="padding: 2.5rem 1rem;">
+                <i class="bi bi-bell-slash" style="font-size:2rem; color:#94a3b8; margin-bottom:0.5rem; display:block;"></i>
+                <p style="margin:0; font-size:0.82rem; color:#64748b;">{% trans "No new notifications" %}</p>
+              </div>
               {% endif %}
             </div>
-            
-            <div class="bg-light text-center border-top p-0">
-              <a href="{% url 'alerts_list' %}" class="btn btn-sm btn-link text-decoration-none d-block w-100 py-2 small fw-medium">View all alerts</a>
+
+            <div class="notif-item-footer">
+              <a href="{% url 'alerts_list' %}"
+                 style="font-size:0.8rem; font-weight:600; color:#2e5090; text-decoration:none;">
+                {% trans "View all alerts" %} <i class="bi bi-arrow-right ms-1"></i>
+              </a>
             </div>
           </div>
         </div>
 
-        <!-- User Info -->
-        <span class="text-muted small">
-          <i class="bi bi-person me-1"></i>{{ request.user.get_full_name|default:request.user.username }}
-        </span>
+        <!-- User chip -->
+        <div class="user-chip">
+          <div class="user-avatar-sm">{{ request.user.username|first|upper }}</div>
+          <span class="user-name d-none d-lg-inline">{{ request.user.get_full_name|default:request.user.username }}</span>
+        </div>
+
       </div>
     </header>
+    <!-- END TOPBAR -->
 
-    <!-- Flash messages -->
+    <!-- Django Flash Messages -->
     {% if messages %}
-    <div class="px-4 pt-3">
+    <div class="flash-messages">
       {% for msg in messages %}
-      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show border-0 shadow-sm rounded-3" role="alert"
+           style="font-size:0.875rem; font-family: 'Inter', sans-serif;">
         {{ msg }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
       {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Page content -->
-    <div class="content-area px-4 py-4">
+    <!-- PAGE CONTENT -->
+    <main class="content-area" role="main">
       {% block content %}{% endblock %}
-    </div>
+    </main>
 
   </div>
   <!-- END MAIN CONTENT -->
 
 </div>
+<!-- END WRAPPER -->
 
-<!-- Bootstrap 5 JS (CDN) -->
+<!-- ══════════════════════════════════════════════════════
+     BOTTOM NAVIGATION (mobile only)
+═══════════════════════════════════════════════════════════ -->
+<nav class="bottom-nav" id="bottom-nav" aria-label="Mobile bottom navigation">
+  <div class="bottom-nav-inner">
+
+    <a href="{% url 'dashboard' %}"
+       class="bottom-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+       id="bnav-dashboard">
+      <i class="bi bi-speedometer2"></i>
+      <span>{% trans "Dashboard" %}</span>
+    </a>
+
+    <a href="{% url 'farms_list' %}"
+       class="bottom-nav-item {% if 'farm' in request.resolver_match.url_name %}active{% endif %}"
+       id="bnav-farms">
+      <i class="bi bi-geo-alt"></i>
+      <span>{% trans "Farms" %}</span>
+    </a>
+
+    <a href="{% url 'ponds_list' %}"
+       class="bottom-nav-item {% if 'pond' in request.resolver_match.url_name %}active{% endif %}"
+       id="bnav-ponds">
+      <i class="bi bi-droplet-half"></i>
+      <span>{% trans "Ponds" %}</span>
+    </a>
+
+    <a href="{% url 'alerts_list' %}"
+       class="bottom-nav-item {% if request.resolver_match.url_name == 'alerts_list' %}active{% endif %}"
+       id="bnav-alerts">
+      <i class="bi bi-bell"></i>
+      {% if unread_alert_count > 0 %}
+        <span class="bottom-nav-badge">{{ unread_alert_count }}</span>
+      {% endif %}
+      <span>{% trans "Alerts" %}</span>
+    </a>
+
+    <a href="{% url 'profile' %}"
+       class="bottom-nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"
+       id="bnav-profile">
+      <i class="bi bi-person-circle"></i>
+      <span>{% trans "Profile" %}</span>
+    </a>
+
+  </div>
+</nav>
+
+<!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 {% block extra_js %}{% endblock %}
 </body>

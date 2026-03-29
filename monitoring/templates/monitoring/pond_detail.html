@@ -1,209 +1,293 @@
 {% extends 'monitoring/base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Live Monitor – {{ pond.name }}{% endblock %}
-{% block page_title %}Live Monitor: {{ pond.name }}{% endblock %}
+{% block title %}{% trans "Live Monitor" %} — {{ pond.name }}{% endblock %}
+{% block page_title %}{{ pond.name }}{% endblock %}
 
 {% block content %}
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'farms_list' %}">Farms</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'farm_detail' pond.farm.id %}">{{ pond.farm.name }}</a></li>
-    <li class="breadcrumb-item active">{{ pond.name }}</li>
+  <ol class="breadcrumb" style="font-size:0.8rem; font-family:'Inter',sans-serif;">
+    <li class="breadcrumb-item"><a href="{% url 'farms_list' %}" style="color:#45B1E8; text-decoration:none;">{% trans "Farms" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'farm_detail' pond.farm.id %}" style="color:#45B1E8; text-decoration:none;">{{ pond.farm.name }}</a></li>
+    <li class="breadcrumb-item active" style="color:#64748b;">{{ pond.name }}</li>
   </ol>
 </nav>
 
-<!-- ── 1. LIVE MONITORING TOP SECTION ── -->
+<!-- Pond status header -->
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+  <div>
+    <h2 style="font-size:1.3rem; font-weight:800; color:#1a2744; margin:0 0 0.2rem; letter-spacing:-0.02em;">
+      {{ pond.name }}
+    </h2>
+    <div style="font-size:0.8rem; color:#64748b;">
+      <i class="bi bi-geo-alt me-1" style="color:#45B1E8;"></i>{{ pond.farm.name }}
+      {% if pond.fish_species %}
+      <span style="margin: 0 6px; color:#e2e8f0;">·</span>
+      <i class="bi bi-water me-1" style="color:#45B1E8;"></i>{{ pond.fish_species }}
+      {% endif %}
+    </div>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    {% if pond.status == 'normal' %}
+      <span class="badge-status badge-normal"><i class="bi bi-check-circle me-1"></i>{% trans "Normal" %}</span>
+    {% elif pond.status == 'warning' %}
+      <span class="badge-status badge-warning"><i class="bi bi-exclamation-triangle me-1"></i>{% trans "Warning" %}</span>
+    {% else %}
+      <span class="badge-status badge-critical"><i class="bi bi-x-octagon me-1"></i>{% trans "Critical" %}</span>
+    {% endif %}
+    <span style="font-size:0.72rem; color:#94a3b8;">
+      <i class="bi bi-clock me-1"></i>{% blocktrans with time=pond.last_updated|timesince %}Updated {{ time }} ago{% endblocktrans %}
+    </span>
+  </div>
+</div>
+
+<!-- ══ 1. CAMERA + IoT READINGS ═════════════════════════════ -->
 <div class="row g-4 mb-4">
-  
-  <!-- LEFT: Camera Stream Panel -->
-  <div class="col-xl-8 col-lg-7">
-    <div class="card h-100 border-0 shadow-sm overflow-hidden bg-dark text-white rounded-4 position-relative">
-      
-      <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center py-3 position-absolute w-100 z-3" style="background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); border: none;">
-        <span class="fw-semibold text-white">
-          <i class="bi bi-camera-video me-2"></i>{{ main_camera.name|default:"Live Feed" }}
+
+  <!-- Camera Panel -->
+  <div class="col-lg-8">
+    <div class="card border-0" style="background:#0f172a; border-radius:14px; overflow:hidden; min-height:280px;">
+
+      <!-- Camera header overlay -->
+      <div style="position:absolute; top:0; left:0; right:0; padding:0.9rem 1rem;
+                  background: linear-gradient(180deg, rgba(0,0,0,0.75) 0%, transparent 100%);
+                  z-index:3; display:flex; justify-content:space-between; align-items:center;">
+        <span style="color:#fff; font-size:0.85rem; font-weight:600; display:flex; align-items:center; gap:0.4rem;">
+          <i class="bi bi-camera-video"></i>
+          {{ main_camera.name|default:"Live Feed" }}
         </span>
-        <div>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
           {% if main_camera %}
-            <span class="badge bg-primary rounded-pill px-3 py-2 me-2"><i class="bi bi-robot me-1"></i>AI Tracking Active</span>
+            <span style="background:rgba(59,130,246,0.85); color:#fff; border-radius:20px; padding:3px 10px; font-size:0.68rem; font-weight:700;">
+              <i class="bi bi-robot me-1"></i>{% trans "AI Active" %}
+            </span>
             {% if main_camera.status == 'online' %}
-              <span class="badge bg-danger rounded-pill px-3 py-2"><i class="bi bi-record-circle me-1"></i>LIVE</span>
+            <span style="background:rgba(239,68,68,0.85); color:#fff; border-radius:20px; padding:3px 10px; font-size:0.68rem; font-weight:700; display:flex; align-items:center; gap:4px;">
+              <span style="width:6px; height:6px; border-radius:50%; background:#fff; animation: pulse-dot 1.2s infinite;"></span>
+              LIVE
+            </span>
             {% else %}
-              <span class="badge bg-secondary rounded-pill px-3 py-2">OFFLINE</span>
+            <span style="background:rgba(100,116,139,0.85); color:#fff; border-radius:20px; padding:3px 10px; font-size:0.68rem; font-weight:700;">{% trans "OFFLINE" %}</span>
             {% endif %}
           {% endif %}
         </div>
       </div>
-      
-      <div class="card-body p-0 position-relative bg-black d-flex align-items-center justify-content-center" style="min-height: 480px; height: 100%;">
-        
+
+      <!-- Video area -->
+      <div style="position:relative; min-height:280px; background:#000; display:flex; align-items:center; justify-content:center;">
         {% if main_camera and main_camera.stream_url %}
-          <!-- Video Player -->
-          <video id="live-video" class="w-100 h-100 object-fit-cover" controls autoplay muted style="max-height: 600px; height: 100%;"></video>
+          <video id="live-video" style="width:100%; max-height:480px; object-fit:cover; display:block;" controls muted></video>
         {% else %}
-          <div class="text-center text-secondary p-5 z-1">
-            <i class="bi bi-camera-video-off fs-1 d-block mb-3 text-muted"></i>
-            <h5 class="fw-semibold text-white">No Live Stream Available</h5>
-            <p class="small text-muted mb-0">Install or configure a camera with a valid stream URL (.mp4 or .m3u8).</p>
+          <div style="text-align:center; padding:3rem 2rem; color:#475569;">
+            <i class="bi bi-camera-video-off" style="font-size:2.5rem; display:block; margin-bottom:0.75rem; color:#334155;"></i>
+            <div style="font-size:0.9rem; font-weight:600; color:#94a3b8; margin-bottom:0.25rem;">{% trans "No Live Stream" %}</div>
+            <div style="font-size:0.78rem; color:#475569;">{% trans "Configure a camera with .mp4 or .m3u8 URL." %}</div>
           </div>
         {% endif %}
-        
       </div>
+
     </div>
   </div>
-  
-  <!-- RIGHT: IoT Readings Panel (Cards) -->
-  <div class="col-xl-4 col-lg-5">
-    <div class="d-flex flex-column h-100 gap-3">
-      <div class="d-flex justify-content-between align-items-center mb-1">
-        <h6 class="fw-semibold mb-0 text-uppercase tracking-wide text-muted" style="font-size:0.85rem;"><i class="bi bi-activity me-2"></i>Current IoT Readings</h6>
-        <div class="spinner-grow text-success spinner-grow-sm" role="status" title="Live Polling Active">
-          <span class="visually-hidden">Loading...</span>
+
+  <!-- IoT Readings Panel -->
+  <div class="col-lg-4">
+    <div class="card border-0 h-100" style="padding: 1rem;">
+
+      <!-- Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.9rem;">
+        <span style="font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#64748b;">
+          <i class="bi bi-activity me-1" style="color:#45B1E8;"></i>{% trans "IoT Readings" %}
+        </span>
+        <div style="display:flex; align-items:center; gap:4px; font-size:0.7rem; color:#10b981; font-weight:600;">
+          <span style="width:7px; height:7px; border-radius:50%; background:#10b981; animation:pulse-dot 1.5s infinite;"></span>
+          {% trans "Live" %}
         </div>
       </div>
-      
-      {% if sensor_data %}
-        {% for item in sensor_data %}
-          <div class="card border-0 shadow-sm rounded-4 flex-fill reading-card transition-all">
-            <div class="card-body d-flex flex-column justify-content-center py-3">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <div class="d-flex align-items-center gap-2">
-                  <!-- Match Icon based on type -->
-                  <div class="p-2 bg-light rounded text-primary">
-                    {% if item.sensor.sensor_type == 'temperature' %}<i class="bi bi-thermometer-half"></i>
-                    {% elif item.sensor.sensor_type == 'oxygen' %}<i class="bi bi-moisture"></i>
-                    {% elif item.sensor.sensor_type == 'pH' %}<i class="bi bi-droplet-half"></i>
-                    {% else %}<i class="bi bi-speedometer2"></i>{% endif %}
-                  </div>
-                  <div>
-                    <span class="text-dark fw-bold d-block lh-1">{{ item.sensor.get_sensor_type_display }}</span>
-                    <span class="text-muted small" style="font-size: 0.7rem;">{{ item.sensor.device_code }}</span>
-                  </div>
+
+      <!-- Desktop: Stacked cards -->
+      <div class="d-none d-lg-flex flex-column gap-3 h-100" id="iot-stack">
+        {% if sensor_data %}
+          {% for item in sensor_data %}
+          <div class="iot-reading-card flex-fill" style="flex: 1;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <div class="reading-sensor-icon">
+                  {% if item.sensor.sensor_type == 'temperature' %}<i class="bi bi-thermometer-half"></i>
+                  {% elif item.sensor.sensor_type == 'oxygen' %}<i class="bi bi-moisture"></i>
+                  {% elif item.sensor.sensor_type == 'pH' %}<i class="bi bi-droplet-half"></i>
+                  {% elif item.sensor.sensor_type == 'salinity' %}<i class="bi bi-water"></i>
+                  {% elif item.sensor.sensor_type == 'turbidity' %}<i class="bi bi-eye-slash"></i>
+                  {% else %}<i class="bi bi-speedometer2"></i>{% endif %}
                 </div>
-                
-                {% if item.sensor.status == 'online' %}
-                  <span id="sensor-status-{{ item.sensor.sensor_type }}" class="status-indicator bg-success" style="width:10px; height:10px; border-radius:50%; box-shadow: 0 0 6px rgba(25,135,84,0.5);"></span>
-                {% elif item.sensor.status == 'offline' %}
-                  <span id="sensor-status-{{ item.sensor.sensor_type }}" class="status-indicator bg-secondary" style="width:10px; height:10px; border-radius:50%;"></span>
+                <div>
+                  <div style="font-size:0.78rem; font-weight:700; color:#1a2744; line-height:1.1;">
+                    {{ item.sensor.get_sensor_type_display }}
+                  </div>
+                  <div style="font-size:0.62rem; color:#94a3b8;">{{ item.sensor.device_code }}</div>
+                </div>
+              </div>
+              <span class="status-dot {{ item.sensor.status }}"
+                    id="sensor-status-{{ item.sensor.sensor_type }}"></span>
+            </div>
+            <div style="display:flex; align-items:baseline; gap:0.25rem; justify-content:space-between;">
+              <div>
+                {% if item.latest %}
+                  <span class="reading-value" id="sensor-val-{{ item.sensor.sensor_type }}">
+                    {{ item.latest.value|floatformat:2 }}
+                  </span>
+                  <span class="reading-unit">{{ item.sensor.unit }}</span>
                 {% else %}
-                  <span id="sensor-status-{{ item.sensor.sensor_type }}" class="status-indicator bg-warning" style="width:10px; height:10px; border-radius:50%;"></span>
+                  <span style="font-size:1rem; color:#94a3b8; font-weight:600;"
+                        id="sensor-val-{{ item.sensor.sensor_type }}">{% trans "N/A" %}</span>
                 {% endif %}
               </div>
-              
-              <div class="d-flex align-items-baseline justify-content-between mt-2">
-                <div class="d-flex align-items-baseline gap-1">
-                  {% if item.latest %}
-                    <h2 class="mb-0 fw-bolder text-dark" id="sensor-val-{{ item.sensor.sensor_type }}">{{ item.latest.value|floatformat:2 }}</h2>
-                    <span class="text-secondary fw-semibold">{{ item.sensor.unit }}</span>
-                  {% else %}
-                    <h4 class="mb-0 fw-semibold text-muted" id="sensor-val-{{ item.sensor.sensor_type }}">No Data</h4>
-                  {% endif %}
-                </div>
-                
-                <div class="small text-muted text-end">
-                  {% if item.latest %}
-                    <span id="sensor-time-{{ item.sensor.sensor_type }}">{{ item.latest.recorded_at|timesince }} ago</span>
-                  {% else %}
-                    <span id="sensor-time-{{ item.sensor.sensor_type }}"></span>
-                  {% endif %}
-                </div>
-              </div>
+              <span style="font-size:0.7rem; color:#94a3b8;" id="sensor-time-{{ item.sensor.sensor_type }}">
+                {% if item.latest %}{% blocktrans with time=item.latest.recorded_at|timesince %}{{ time }} ago{% endblocktrans %}{% endif %}
+              </span>
             </div>
           </div>
-        {% endfor %}
-      {% else %}
-        <div class="card border-0 shadow-sm rounded-4 h-100 d-flex align-items-center justify-content-center bg-light">
-          <div class="text-center text-muted p-4">
-            <i class="bi bi-info-circle fs-3 d-block mb-3"></i>
-            <p class="mb-0 small fw-medium">No IoT sensors linked to this pond.</p>
+          {% endfor %}
+        {% else %}
+          <div style="display:flex; align-items:center; justify-content:center; flex:1; text-align:center; color:#94a3b8; padding:2rem 1rem;">
+            <div>
+              <i class="bi bi-plug" style="font-size:2rem; display:block; margin-bottom:0.5rem; color:#cbd5e1;"></i>
+              <div style="font-size:0.82rem;">{% trans "No IoT sensors linked." %}</div>
+            </div>
           </div>
-        </div>
-      {% endif %}
-      
-    </div>
-  </div>
-</div>
+        {% endif %}
+      </div>
 
-<!-- ── 2. CHART & ACTIONS ROW ── -->
-<div class="row g-4 mb-4">
-  <!-- 24-Hour Trend Chart -->
-  <div class="col-lg-8">
-    <div class="card shadow-sm border-0 rounded-4 h-100">
-      <div class="card-header bg-white fw-semibold border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-graph-up text-primary me-2"></i>24-Hour Sensor Trend</span>
-        <span class="badge bg-light text-dark border">Temp & DO</span>
-      </div>
-      <div class="card-body">
-        <!-- Canvas for Chart.js -->
-        <canvas id="trendChart" style="max-height: 250px; width: 100%;"></canvas>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Action Buttons -->
-  <div class="col-lg-4">
-    <div class="card shadow-sm border-0 rounded-4 h-100 overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
-      <div class="card-body d-flex flex-column p-4 text-white">
-        <h5 class="fw-semibold mb-4 text-center mt-2"><i class="bi bi-lightning-charge text-warning me-2"></i>Quick Actions</h5>
-        
-        <form action="{% url 'pond_action_aerator' pond.id %}" method="POST" class="w-100 mb-2">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger rounded-pill fw-medium py-3 w-100 d-flex align-items-center justify-content-center gap-2 shadow-sm transition-all hover-lift">
-            <i class="bi bi-fan fs-5"></i> Activate Emergency Aerator
-          </button>
-        </form>
-        
-        <a href="{% url 'pond_action_report' pond.id %}" class="btn bg-white text-dark rounded-pill fw-medium py-2 mb-2 w-100 d-flex align-items-center justify-content-center gap-2 shadow-sm transition-all hover-lift text-decoration-none">
-          <i class="bi bi-file-earmark-bar-graph text-primary fs-5"></i> Generate 24hr Report
-        </a>
-        
-        <form action="{% url 'pond_action_calibrate' pond.id %}" method="POST" class="w-100 mt-auto">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-outline-light rounded-pill fw-medium py-2 w-100 d-flex align-items-center justify-content-center gap-2 transition-all hover-lift">
-            <i class="bi bi-sliders"></i> Calibrate Sensors
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── 3. DETAILED DATA ROW ── -->
-<div class="row g-4 mb-5">
-  
-  <!-- Pond Overview -->
-  <div class="col-lg-4">
-    <div class="card shadow-sm border-0 rounded-4 h-100">
-      <div class="card-header bg-white fw-semibold border-bottom-0 pt-4 pb-0">
-        <i class="bi bi-info-circle me-2 text-teal"></i>Pond Overview
-      </div>
-      <div class="card-body">
-        <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
-          <span class="text-muted small text-uppercase">Fish Species</span>
-          <span class="fw-medium">{{ pond.fish_species|default:"—" }}</span>
-        </div>
-        <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
-          <span class="text-muted small text-uppercase">Fish Count</span>
-          <span class="fw-medium">{{ pond.fish_count }}</span>
-        </div>
-        <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
-          <span class="text-muted small text-uppercase">Status</span>
-          <div>
-            {% if pond.status == 'normal' %}
-              <span class="badge bg-success px-2">Normal</span>
-            {% elif pond.status == 'warning' %}
-              <span class="badge bg-warning text-dark px-2">Warning</span>
+      <!-- Mobile: Horizontal scroll strip -->
+      <div class="d-flex d-lg-none iot-strip" id="iot-strip-mobile">
+        {% if sensor_data %}
+          {% for item in sensor_data %}
+          <div class="iot-reading-card">
+            <div class="reading-sensor-icon">
+              {% if item.sensor.sensor_type == 'temperature' %}<i class="bi bi-thermometer-half"></i>
+              {% elif item.sensor.sensor_type == 'oxygen' %}<i class="bi bi-moisture"></i>
+              {% elif item.sensor.sensor_type == 'pH' %}<i class="bi bi-droplet-half"></i>
+              {% elif item.sensor.sensor_type == 'salinity' %}<i class="bi bi-water"></i>
+              {% elif item.sensor.sensor_type == 'turbidity' %}<i class="bi bi-eye-slash"></i>
+              {% else %}<i class="bi bi-speedometer2"></i>{% endif %}
+            </div>
+            <div class="reading-label">{{ item.sensor.get_sensor_type_display }}</div>
+            {% if item.latest %}
+              <div style="margin-top:0.3rem;">
+                <span class="reading-value" style="font-size:1.3rem;">{{ item.latest.value|floatformat:2 }}</span>
+                <span class="reading-unit"> {{ item.sensor.unit }}</span>
+              </div>
             {% else %}
-              <span class="badge bg-danger px-2">Critical</span>
+              <div class="reading-value" style="font-size:1.1rem; color:#94a3b8;">{% trans "N/A" %}</div>
             {% endif %}
           </div>
+          {% endfor %}
+        {% else %}
+          <div style="padding:1rem; font-size:0.82rem; color:#94a3b8;">{% trans "No sensors linked." %}</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ 2. CHART + QUICK ACTIONS ═════════════════════════════ -->
+<div class="row g-4 mb-4">
+
+  <!-- 24-Hour Trend Chart -->
+  <div class="col-lg-8">
+    <div class="card border-0 h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-graph-up me-2" style="color:#45B1E8;"></i>{% trans "24-Hour Sensor Trend" %}</span>
+        <span class="badge-status badge-info" style="font-size:0.68rem;">{% trans "Temp & DO" %}</span>
+      </div>
+      <div class="card-body" style="padding:1.25rem;">
+        <canvas id="trendChart" style="width:100%; max-height:240px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="col-lg-4">
+    <div class="card border-0 h-100 overflow-hidden"
+         style="background: linear-gradient(145deg, #1a2e52 0%, #0f172a 100%);">
+      <div class="card-body d-flex flex-column p-4" style="color:#fff; gap:0.75rem;">
+        <div style="font-size:0.85rem; font-weight:700; color:#fff; text-align:center; margin-bottom:0.25rem;">
+          <i class="bi bi-lightning-charge me-2" style="color:#fbbf24;"></i>{% trans "Quick Actions" %}
         </div>
-        <div class="d-flex justify-content-between">
-          <span class="text-muted small text-uppercase">Last Updated</span>
-          <span class="small">{{ pond.last_updated|date:"d M H:i" }}</span>
+
+        <form action="{% url 'pond_action_aerator' pond.id %}" method="POST">
+          {% csrf_token %}
+          <button type="submit"
+                  class="w-100 d-flex align-items-center justify-content-center gap-2"
+                  style="background:#ef4444; color:#fff; border:none; border-radius:12px; padding:0.75rem; font-size:0.875rem; font-weight:700; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; min-height:52px;">
+            <i class="bi bi-fan" style="font-size:1.1rem;"></i>
+            {% trans "Emergency Aerator" %}
+          </button>
+        </form>
+
+        <a href="{% url 'pond_action_report' pond.id %}"
+           style="background:rgba(255,255,255,0.12); color:#fff; border:1.5px solid rgba(255,255,255,0.2); border-radius:12px; padding:0.65rem; font-size:0.85rem; font-weight:600; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:all 0.2s; min-height:48px; font-family:'Inter',sans-serif; backdrop-filter:blur(4px);">
+          <i class="bi bi-file-earmark-bar-graph" style="font-size:1.05rem; color:#93c5fd;"></i>
+          {% trans "Generate 24hr Report" %}
+        </a>
+
+        <form action="{% url 'pond_action_calibrate' pond.id %}" method="POST" class="mt-auto">
+          {% csrf_token %}
+          <button type="submit"
+                  class="w-100 d-flex align-items-center justify-content-center gap-2"
+                  style="background:transparent; color:rgba(255,255,255,0.7); border:1.5px solid rgba(255,255,255,0.2); border-radius:12px; padding:0.6rem; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; min-height:44px;">
+            <i class="bi bi-sliders"></i>
+            {% trans "Calibrate Sensors" %}
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ 3. DETAIL ROW: Pond Overview, AI Detections, Alerts ══ -->
+<div class="row g-4 mb-2">
+
+  <!-- Pond Overview -->
+  <div class="col-lg-4">
+    <div class="card border-0 h-100">
+      <div class="card-header">
+        <i class="bi bi-info-circle me-2 text-accent"></i>{% trans "Pond Overview" %}
+      </div>
+      <div class="card-body" style="padding:1.25rem;">
+        <div style="display:flex; flex-direction:column; gap:0;">
+          <!-- Fish Species -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:0.65rem 0; border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#94a3b8;">{% trans "Fish Species" %}</span>
+            <span style="font-size:0.82rem; color:#1a2744; font-weight:500;">{{ pond.fish_species|default:"—" }}</span>
+          </div>
+          <!-- Fish Count -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:0.65rem 0; border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#94a3b8;">{% trans "Fish Count" %}</span>
+            <span style="font-size:0.82rem; color:#1a2744; font-weight:500;">{{ pond.fish_count }}</span>
+          </div>
+          <!-- Status -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:0.65rem 0; border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#94a3b8;">{% trans "Status" %}</span>
+            {% if pond.status == 'normal' %}
+              <span class="badge-status badge-normal">{% trans "Normal" %}</span>
+            {% elif pond.status == 'warning' %}
+              <span class="badge-status badge-warning">{% trans "Warning" %}</span>
+            {% else %}
+              <span class="badge-status badge-critical">{% trans "Critical" %}</span>
+            {% endif %}
+          </div>
+          <!-- Last Updated -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:0.65rem 0;">
+            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#94a3b8;">{% trans "Last Updated" %}</span>
+            <span style="font-size:0.82rem; color:#1a2744; font-weight:500;">{{ pond.last_updated|date:"d M H:i" }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -211,245 +295,243 @@
 
   <!-- AI Detections -->
   <div class="col-lg-4">
-    <div class="card shadow-sm border-0 rounded-4 h-100">
-      <div class="card-header bg-white fw-semibold border-bottom-0 pt-4 pb-2">
-        <i class="bi bi-robot me-2 text-teal"></i>AI Detections
+    <div class="card border-0 h-100">
+      <div class="card-header">
+        <i class="bi bi-robot me-2 text-accent"></i>{% trans "AI Detections" %}
       </div>
-      <div class="card-body p-0">
+      <div style="overflow:hidden;">
         {% if detections %}
-        <ul class="list-group list-group-flush rounded-bottom-4">
-          {% for d in detections|slice:":4" %}
-          <li class="list-group-item px-4 py-3 border-light">
-            <div class="d-flex justify-content-between align-items-start mb-1">
-              <span class="fw-semibold text-dark">{{ d.detection_type }}</span>
-              <div>
+          <ul style="list-style:none; margin:0; padding:0;">
+            {% for d in detections|slice:":4" %}
+            <li style="padding:0.75rem 1.25rem; border-bottom:1px solid #f1f5f9; font-family:'Inter',sans-serif;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.35rem;">
+                <span style="font-size:0.85rem; font-weight:700; color:#1a2744;">{{ d.detection_type }}</span>
                 {% if d.risk_level == 'critical' %}
-                  <span class="badge bg-danger rounded-pill" style="font-size:0.6rem;">Critical</span>
+                  <span class="badge-status badge-critical" style="font-size:0.6rem;">{% trans "Critical" %}</span>
                 {% elif d.risk_level == 'high' %}
-                  <span class="badge bg-orange text-white rounded-pill" style="font-size:0.6rem;">High</span>
+                  <span class="badge-status badge-high" style="font-size:0.6rem;">{% trans "High" %}</span>
                 {% elif d.risk_level == 'medium' %}
-                  <span class="badge bg-warning text-dark rounded-pill" style="font-size:0.6rem;">Medium</span>
+                  <span class="badge-status badge-warning" style="font-size:0.6rem;">{% trans "Medium" %}</span>
                 {% else %}
-                  <span class="badge bg-success rounded-pill" style="font-size:0.6rem;">Low</span>
+                  <span class="badge-status badge-normal" style="font-size:0.6rem;">{% trans "Low" %}</span>
                 {% endif %}
               </div>
-            </div>
-            <div class="text-muted small mb-2 lh-sm">{{ d.description|truncatechars:50 }}</div>
-            <div class="d-flex justify-content-between align-items-center">
-               <small class="text-muted" style="font-size:0.7rem;"><i class="bi bi-clock me-1"></i>{{ d.detected_at|timesince }} ago</small>
-               <span class="badge bg-light text-secondary border">{{ d.confidence_score|floatformat:2 }} conf</span>
-            </div>
-          </li>
-          {% endfor %}
-        </ul>
+              <div style="font-size:0.78rem; color:#64748b; margin-bottom:0.4rem; line-height:1.5;">
+                {{ d.description|truncatechars:55 }}
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.68rem; color:#94a3b8;"><i class="bi bi-clock me-1"></i>{% blocktrans with time=d.detected_at|timesince %}{{ time }} ago{% endblocktrans %}</span>
+                <span class="badge-status badge-info" style="font-size:0.6rem;">{% blocktrans with conf=d.confidence_score|floatformat:2 %}{{ conf }} conf{% endblocktrans %}</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
         {% else %}
-        <div class="text-center py-5 text-muted small">
-          <i class="bi bi-shield-check fs-3 d-block mb-2 text-success"></i>
-          No AI detections recorded.
-        </div>
+          <div class="empty-state" style="padding:2.5rem 1rem;">
+            <i class="bi bi-shield-check" style="font-size:2rem; color:#10b981; display:block; margin-bottom:0.5rem;"></i>
+            <p style="font-size:0.82rem; margin:0; color:#64748b;">{% trans "No AI detections recorded." %}</p>
+          </div>
         {% endif %}
       </div>
     </div>
   </div>
-  
-  <!-- Alerts -->
+
+  <!-- Recent Alerts -->
   <div class="col-lg-4">
-    <div class="card shadow-sm border-0 rounded-4 h-100">
-      <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom-0 pt-4 pb-2">
-        <span class="fw-semibold"><i class="bi bi-bell-fill text-danger me-2"></i>Recent Alerts</span>
-        <a href="{% url 'alerts_list' %}" class="small text-teal text-decoration-none fw-medium">View All</a>
+    <div class="card border-0 h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-bell-fill me-2" style="color:#ef4444;"></i>{% trans "Recent Alerts" %}</span>
+        <a href="{% url 'alerts_list' %}" style="font-size:0.78rem; color:#45B1E8; text-decoration:none; font-weight:600;">
+          {% trans "View All" %} <i class="bi bi-arrow-right ms-1"></i>
+        </a>
       </div>
-      <div class="card-body p-0">
+      <div>
         {% if alerts %}
-        <ul class="list-group list-group-flush rounded-bottom-4">
-          {% for alert in alerts|slice:":4" %}
-          <li class="list-group-item px-4 py-3 {% if alert.status == 'open' %}bg-danger-subtle border-start border-danger border-4{% else %}border-start border-transparent border-4{% endif %} hover-bg-light transition-all">
-            <div class="d-flex justify-content-between align-items-start mb-1">
-              <span class="fw-semibold text-dark" style="font-size:0.9rem;">{{ alert.title }}</span>
-              {% if alert.status == 'open' %}
-                <span class="badge bg-danger rounded-pill" style="font-size:0.6rem;">OPEN</span>
-              {% endif %}
-            </div>
-            <div class="mb-2 text-muted small lh-sm">{{ alert.message|truncatechars:55 }}</div>
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                {% if alert.severity == 'critical' %}
-                  <span class="badge bg-danger-soft text-danger border border-danger">Critical</span>
-                {% elif alert.severity == 'high' %}
-                  <span class="badge bg-orange text-white">High</span>
-                {% elif alert.severity == 'warning' %}
-                  <span class="badge bg-warning-soft text-warning border border-warning">Warning</span>
-                {% else %}
-                  <span class="badge bg-info text-dark">Info</span>
+          <ul style="list-style:none; margin:0; padding:0;">
+            {% for alert in alerts|slice:":4" %}
+            <li style="padding:0.75rem 1.25rem; border-bottom:1px solid #f1f5f9;
+                       border-left:3px solid {% if alert.status == 'open' %}#ef4444{% else %}transparent{% endif %};
+                       font-family:'Inter',sans-serif;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.35rem;">
+                <span style="font-size:0.83rem; font-weight:700; color:#1a2744; line-height:1.3;">{{ alert.title }}</span>
+                {% if alert.status == 'open' %}
+                  <span class="badge-status badge-open" style="font-size:0.58rem; flex-shrink:0; margin-left:0.5rem;">{% trans "OPEN" %}</span>
                 {% endif %}
               </div>
-              <small class="text-muted" style="font-size:0.7rem;"><i class="bi bi-clock me-1"></i>{{ alert.created_at|timesince }} ago</small>
-            </div>
-          </li>
-          {% endfor %}
-        </ul>
+              <div style="font-size:0.77rem; color:#64748b; margin-bottom:0.4rem; line-height:1.5;">
+                {{ alert.message|truncatechars:55 }}
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  {% if alert.severity == 'critical' %}
+                    <span class="badge-status badge-critical" style="font-size:0.6rem;">{% trans "Critical" %}</span>
+                  {% elif alert.severity == 'high' %}
+                    <span class="badge-status badge-high" style="font-size:0.6rem;">{% trans "High" %}</span>
+                  {% elif alert.severity == 'warning' %}
+                    <span class="badge-status badge-warning" style="font-size:0.6rem;">{% trans "Warning" %}</span>
+                  {% else %}
+                    <span class="badge-status badge-info" style="font-size:0.6rem;">{% trans "Info" %}</span>
+                  {% endif %}
+                </div>
+                <span style="font-size:0.68rem; color:#94a3b8;"><i class="bi bi-clock me-1"></i>{% blocktrans with time=alert.created_at|timesince %}{{ time }} ago{% endblocktrans %}</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
         {% else %}
-        <div class="text-center py-5 text-muted small">
-          <i class="bi bi-check2-circle fs-3 d-block mb-2 text-success"></i>
-          All clear! No alerts for this pond.
-        </div>
+          <div class="empty-state" style="padding:2.5rem 1rem;">
+            <i class="bi bi-check2-circle" style="font-size:2rem; color:#10b981; display:block; margin-bottom:0.5rem;"></i>
+            <p style="font-size:0.82rem; margin:0; color:#64748b;">{% trans "No alerts for this pond." %}</p>
+          </div>
         {% endif %}
       </div>
     </div>
   </div>
 
 </div>
+
+<!-- Pulse dot animation -->
+<style>
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+</style>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- Include hls.js for m3u8 stream support -->
+<!-- HLS.js for m3u8 streams -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<!-- Include Chart.js -->
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    
-    // 1. STREAMS HANDLING (HLS.JS)
-    var video = document.getElementById('live-video');
-    {% if main_camera and main_camera.stream_url %}
-    var videoSrc = "{{ main_camera.stream_url|escapejs }}";
+document.addEventListener('DOMContentLoaded', function() {
 
-    if (video && videoSrc) {
-      if (videoSrc.endsWith('.m3u8')) {
-        if (Hls.isSupported()) {
-          var hls = new Hls();
-          hls.loadSource(videoSrc);
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, function() {
-            video.play().catch(e => console.log("Autoplay prevented:", e));
-          });
-        }
-        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          video.src = videoSrc;
-          video.addEventListener('loadedmetadata', function() {
-            video.play().catch(e => console.log("Autoplay prevented:", e));
-          });
-        }
-      } else {
+  // ── 1. VIDEO STREAM ────────────────────────────────────────
+  const video = document.getElementById('live-video');
+  {% if main_camera and main_camera.stream_url %}
+  const videoSrc = "{{ main_camera.stream_url|escapejs }}";
+  if (video && videoSrc) {
+    if (videoSrc.endsWith('.m3u8')) {
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(e => console.log('Autoplay prevented:', e));
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = videoSrc;
-        video.play().catch(e => console.log("Autoplay prevented:", e));
+        video.addEventListener('loadedmetadata', () => video.play().catch(() => {}));
       }
+    } else {
+      video.src = videoSrc;
+      video.play().catch(() => {});
     }
-    {% endif %}
+  }
+  {% endif %}
 
-    // 2. CHART.JS INITIALIZATION
-    const ctx = document.getElementById('trendChart');
-    if (ctx) {
-      // Data passed from Django Context
-      const labels = {{ chart_labels|safe|default:"[]" }};
-      const temp_data = {{ chart_temp|safe|default:"[]" }};
-      const do_data = {{ chart_do|safe|default:"[]" }};
+  // ── 2. TREND CHART ─────────────────────────────────────────
+  const ctx = document.getElementById('trendChart');
+  if (ctx) {
+    const labels    = {{ chart_labels|safe|default:"[]" }};
+    const tempData  = {{ chart_temp|safe|default:"[]" }};
+    const doData    = {{ chart_do|safe|default:"[]" }};
 
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'Temperature (°C)',
-              data: temp_data,
-              borderColor: '#f97316', // Orange
-              backgroundColor: 'rgba(249, 115, 22, 0.1)',
-              borderWidth: 2,
-              pointRadius: 2,
-              pointBackgroundColor: '#f97316',
-              tension: 0.3,
-              fill: true,
-              spanGaps: true,
-              yAxisID: 'y'
-            },
-            {
-              label: 'Dissolved Oxygen (mg/L)',
-              data: do_data,
-              borderColor: '#0ea5e9', // Blue/Teal
-              backgroundColor: 'rgba(14, 165, 233, 0.1)',
-              borderWidth: 2,
-              pointRadius: 2,
-              pointBackgroundColor: '#0ea5e9',
-              tension: 0.3,
-              fill: true,
-              spanGaps: true,
-              yAxisID: 'y1'
-            }
-          ]
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: '{% trans "Temperature (°C)" %}',
+            data: tempData,
+            borderColor: '#f97316',
+            backgroundColor: 'rgba(249,115,22,0.08)',
+            borderWidth: 2,
+            pointRadius: 2,
+            pointBackgroundColor: '#f97316',
+            tension: 0.35,
+            fill: true,
+            spanGaps: true,
+            yAxisID: 'y'
+          },
+          {
+            label: '{% trans "Dissolved Oxygen (mg/L)" %}',
+            data: doData,
+            borderColor: '#45B1E8',
+            backgroundColor: 'rgba(69,177,232,0.08)',
+            borderWidth: 2,
+            pointRadius: 2,
+            pointBackgroundColor: '#45B1E8',
+            tension: 0.35,
+            fill: true,
+            spanGaps: true,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { boxWidth: 12, usePointStyle: true, font: { family: 'Inter', size: 11 } }
+          }
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: {
-            mode: 'index',
-            intersect: false,
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10 } } },
+          y: {
+            type: 'linear', display: true, position: 'left',
+            title: { display: true, text: '°C', font: { family: 'Inter', size: 10 } },
+            ticks: { font: { family: 'Inter', size: 10 } }
           },
-          plugins: {
-            legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true } }
-          },
-          scales: {
-            x: { grid: { display: false } },
-            y: { 
-              type: 'linear', display: true, position: 'left',
-              title: { display: true, text: 'Temp (°C)', font: {size: 10} }
-            },
-            y1: { 
-              type: 'linear', display: true, position: 'right',
-              grid: { drawOnChartArea: false },
-              title: { display: true, text: 'DO (mg/L)', font: {size: 10} }
-            }
+          y1: {
+            type: 'linear', display: true, position: 'right',
+            grid: { drawOnChartArea: false },
+            title: { display: true, text: 'mg/L', font: { family: 'Inter', size: 10 } },
+            ticks: { font: { family: 'Inter', size: 10 } }
           }
         }
-      });
-    }
+      }
+    });
+  }
 
-    // 3. AJAX POLLING FOR LIVE IOT READINGS
-    function pollLiveReadings() {
-      fetch("{% url 'pond_live_readings' pond.id %}")
-        .then(response => response.json())
-        .then(data => {
-          if(data.status === 'ok') {
-            const readings = data.readings;
-            // Iterate over returned sensor data (key is sensor_type like 'temperature', 'oxygen')
-            for (const [key, info] of Object.entries(readings)) {
-              
-              const valEl = document.getElementById('sensor-val-' + key);
-              const timeEl= document.getElementById('sensor-time-' + key);
-              const statEl= document.getElementById('sensor-status-' + key);
-              
-              // Update numeric value
-              if(valEl && info.value !== 'N/A') {
-                valEl.innerText = info.value;
-                // Optional: flash effect
-                valEl.style.color = '#0ea5e9'; // flash blue
-                setTimeout(() => valEl.style.color = '', 800);
-              }
-              
-              // Update status dot class
-              if(statEl) {
-                statEl.className = 'status-indicator bg-' + info.status_color;
-                if(info.status_color === 'success') {
-                  statEl.style.boxShadow = '0 0 6px rgba(25,135,84,0.5)';
-                } else {
-                  statEl.style.boxShadow = 'none';
-                }
-              }
+  // ── 3. LIVE IoT POLLING ────────────────────────────────────
+  function pollLiveReadings() {
+    fetch("{% url 'pond_live_readings' pond.id %}")
+      .then(r => r.json())
+      .then(data => {
+        if (data.status !== 'ok') return;
+        for (const [key, info] of Object.entries(data.readings)) {
+          const valEl  = document.getElementById('sensor-val-'    + key);
+          const timeEl = document.getElementById('sensor-time-'   + key);
+          const statEl = document.getElementById('sensor-status-' + key);
 
-              // Update "Just now" text
-              if(timeEl) {
-                timeEl.innerText = info.time_ago || '';
-              }
-            }
+          if (valEl && info.value !== 'N/A') {
+            valEl.textContent = info.value;
+            valEl.classList.add('flash-update');
+            setTimeout(() => valEl.classList.remove('flash-update'), 800);
           }
-        })
-        .catch(error => console.error("Live monitoring poll error:", error));
-    }
 
-    // Fetch every 5 seconds (5000 ms)
-    setInterval(pollLiveReadings, 5000);
-    
-  });
+          if (statEl) {
+            statEl.className = 'status-dot ' + (info.status_color === 'success' ? 'online' :
+                                                info.status_color === 'warning' ? 'faulty' : 'offline');
+          }
+
+          if (timeEl && info.time_ago) {
+            timeEl.textContent = info.time_ago;
+          }
+        }
+      })
+      .catch(err => console.error('Poll error:', err));
+  }
+
+  setInterval(pollLiveReadings, 5000);
+});
 </script>
 {% endblock %}

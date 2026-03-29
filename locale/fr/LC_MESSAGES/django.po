@@ -1,0 +1,556 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-29 06:13+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: aquaculture/settings.py:103
+msgid "English"
+msgstr ""
+
+#: aquaculture/settings.py:104
+msgid "French"
+msgstr ""
+
+#: aquaculture/settings.py:105
+msgid "Arabic"
+msgstr ""
+
+#: monitoring/templates/monitoring/alerts.html:4
+#: monitoring/templates/monitoring/base.html:62
+#: monitoring/templates/monitoring/base.html:158
+#: monitoring/templates/monitoring/base.html:350
+#: monitoring/templates/monitoring/dashboard.html:188
+msgid "Alerts"
+msgstr "Alertes"
+
+#: monitoring/templates/monitoring/alerts.html:5
+#: monitoring/templates/monitoring/alerts.html:12
+#: monitoring/templates/monitoring/dashboard.html:50
+msgid "Alert Center"
+msgstr "Centre d'alertes"
+
+#: monitoring/templates/monitoring/alerts.html:13
+msgid "Track and manage all system alerts across your ponds."
+msgstr "Suivez et gérez toutes les alertes système."
+
+#: monitoring/templates/monitoring/alerts.html:17
+msgid "Mark all as read"
+msgstr "Tout marquer comme lu"
+
+#: monitoring/templates/monitoring/alerts.html:24
+msgid "Filter alerts by status"
+msgstr "Filtrer les alertes"
+
+#: monitoring/templates/monitoring/alerts.html:26
+#: monitoring/templates/monitoring/ponds.html:21
+msgid "All"
+msgstr "Tout"
+
+#: monitoring/templates/monitoring/alerts.html:29
+#: monitoring/templates/monitoring/alerts.html:69
+#: monitoring/templates/monitoring/alerts.html:92
+#: monitoring/templates/monitoring/alerts.html:146
+msgid "Open"
+msgstr "Ouvert"
+
+#: monitoring/templates/monitoring/alerts.html:32
+#: monitoring/templates/monitoring/alerts.html:94
+msgid "Acknowledged"
+msgstr "Reconnu"
+
+#: monitoring/templates/monitoring/alerts.html:35
+#: monitoring/templates/monitoring/alerts.html:96
+msgid "Resolved"
+msgstr "Résolu"
+
+#: monitoring/templates/monitoring/alerts.html:49
+msgid "Title"
+msgstr "Titre"
+
+#: monitoring/templates/monitoring/alerts.html:50
+msgid "Pond"
+msgstr "Bassin"
+
+#: monitoring/templates/monitoring/alerts.html:51
+msgid "Farm"
+msgstr "Ferme"
+
+#: monitoring/templates/monitoring/alerts.html:52
+msgid "Type"
+msgstr "Type"
+
+#: monitoring/templates/monitoring/alerts.html:53
+msgid "Severity"
+msgstr "Sévérité"
+
+#: monitoring/templates/monitoring/alerts.html:54
+#: monitoring/templates/monitoring/pond_detail.html:277
+msgid "Status"
+msgstr "Statut"
+
+#: monitoring/templates/monitoring/alerts.html:55
+msgid "Date"
+msgstr "Date"
+
+#: monitoring/templates/monitoring/alerts.html:81
+#: monitoring/templates/monitoring/alerts.html:137
+#: monitoring/templates/monitoring/base.html:254
+#: monitoring/templates/monitoring/dashboard.html:112
+#: monitoring/templates/monitoring/pond_detail.html:39
+#: monitoring/templates/monitoring/pond_detail.html:283
+#: monitoring/templates/monitoring/pond_detail.html:310
+#: monitoring/templates/monitoring/pond_detail.html:367
+#: monitoring/templates/monitoring/ponds.html:30
+#: monitoring/templates/monitoring/ponds.html:67
+msgid "Critical"
+msgstr "Critique"
+
+#: monitoring/templates/monitoring/alerts.html:83
+#: monitoring/templates/monitoring/alerts.html:139
+#: monitoring/templates/monitoring/base.html:256
+#: monitoring/templates/monitoring/pond_detail.html:312
+#: monitoring/templates/monitoring/pond_detail.html:369
+msgid "High"
+msgstr "Élevé"
+
+#: monitoring/templates/monitoring/alerts.html:85
+#: monitoring/templates/monitoring/alerts.html:141
+#: monitoring/templates/monitoring/base.html:258
+#: monitoring/templates/monitoring/dashboard.html:110
+#: monitoring/templates/monitoring/pond_detail.html:37
+#: monitoring/templates/monitoring/pond_detail.html:281
+#: monitoring/templates/monitoring/pond_detail.html:371
+#: monitoring/templates/monitoring/ponds.html:27
+#: monitoring/templates/monitoring/ponds.html:63
+msgid "Warning"
+msgstr "Avertissement"
+
+#: monitoring/templates/monitoring/alerts.html:87
+#: monitoring/templates/monitoring/alerts.html:143
+#: monitoring/templates/monitoring/base.html:260
+#: monitoring/templates/monitoring/pond_detail.html:373
+msgid "Info"
+msgstr "Info"
+
+#: monitoring/templates/monitoring/alerts.html:106
+msgid "Mark as read"
+msgstr "Marquer lu"
+
+#: monitoring/templates/monitoring/alerts.html:148
+msgid "Ack"
+msgstr "Rec"
+
+#: monitoring/templates/monitoring/alerts.html:150
+msgid "Done"
+msgstr "Fait"
+
+#: monitoring/templates/monitoring/alerts.html:163
+#: monitoring/templates/monitoring/base.html:248
+#: monitoring/templates/monitoring/pond_detail.html:148
+#: monitoring/templates/monitoring/pond_detail.html:323
+#: monitoring/templates/monitoring/pond_detail.html:376
+#: monitoring/templates/monitoring/ponds.html:116
+#, python-format
+msgid "%(time)s ago"
+msgstr "il y a %(time)s"
+
+#: monitoring/templates/monitoring/alerts.html:169
+msgid "View Pond"
+msgstr "Voir le bassin"
+
+#: monitoring/templates/monitoring/alerts.html:191
+msgid "All Clear!"
+msgstr "Tout va bien !"
+
+#: monitoring/templates/monitoring/alerts.html:192
+msgid "No alerts found — all ponds are operating normally."
+msgstr "Aucune alerte — tout fonctionne normalement."
+
+#: monitoring/templates/monitoring/alerts.html:194
+msgid "View Ponds"
+msgstr "Voir les bassins"
+
+#: monitoring/templates/monitoring/base.html:51
+#: monitoring/templates/monitoring/base.html:131
+msgid "Main"
+msgstr "Principal"
+
+#: monitoring/templates/monitoring/base.html:53
+#: monitoring/templates/monitoring/base.html:137
+#: monitoring/templates/monitoring/base.html:326
+#: monitoring/templates/monitoring/dashboard.html:5
+#: monitoring/templates/monitoring/dashboard.html:6
+msgid "Dashboard"
+msgstr "Tableau de Bord"
+
+#: monitoring/templates/monitoring/base.html:56
+#: monitoring/templates/monitoring/base.html:144
+#: monitoring/templates/monitoring/base.html:333
+#: monitoring/templates/monitoring/pond_detail.html:13
+msgid "Farms"
+msgstr "Fermes"
+
+#: monitoring/templates/monitoring/base.html:59
+#: monitoring/templates/monitoring/base.html:151
+#: monitoring/templates/monitoring/base.html:340
+#: monitoring/templates/monitoring/dashboard.html:172
+#: monitoring/templates/monitoring/ponds.html:5
+msgid "Ponds"
+msgstr "Bassins"
+
+#: monitoring/templates/monitoring/base.html:66
+msgid "Account"
+msgstr "Compte"
+
+#: monitoring/templates/monitoring/base.html:68
+#: monitoring/templates/monitoring/base.html:171
+#: monitoring/templates/monitoring/base.html:357
+#: monitoring/templates/monitoring/dashboard.html:204
+msgid "Profile"
+msgstr "Profil"
+
+#: monitoring/templates/monitoring/base.html:73
+#: monitoring/templates/monitoring/base.html:178
+msgid "Logout"
+msgstr "Déconnexion"
+
+#: monitoring/templates/monitoring/base.html:196
+msgid "Open menu"
+msgstr "Ouvrir le menu"
+
+#: monitoring/templates/monitoring/base.html:205
+msgid "Switch language"
+msgstr "Changer de langue"
+
+#: monitoring/templates/monitoring/base.html:209
+#: monitoring/templates/monitoring/login.html:33
+msgid "Select language"
+msgstr "Choisir la langue"
+
+#: monitoring/templates/monitoring/base.html:220
+#: monitoring/templates/monitoring/base.html:229
+msgid "Notifications"
+msgstr "Notifications"
+
+#: monitoring/templates/monitoring/base.html:233
+msgid "Mark all read"
+msgstr ""
+
+#: monitoring/templates/monitoring/base.html:268
+msgid "No new notifications"
+msgstr "Pas de nouvelles notifications"
+
+#: monitoring/templates/monitoring/base.html:276
+msgid "View all alerts"
+msgstr "Voir toutes les alertes"
+
+#: monitoring/templates/monitoring/dashboard.html:16
+#: monitoring/templates/monitoring/dashboard.html:24
+#: monitoring/templates/monitoring/dashboard.html:32
+#, python-format
+msgid "Last sensor sync: %(time)s ago"
+msgstr "Dernière synchro : il y a %(time)s"
+
+#: monitoring/templates/monitoring/dashboard.html:41
+#, python-format
+msgid "Welcome back, %(username)s"
+msgstr "Bon retour, %(username)s"
+
+#: monitoring/templates/monitoring/dashboard.html:43
+msgid "Smart Aquaculture Command Center"
+msgstr "Centre de Commandement Intelligent"
+
+#: monitoring/templates/monitoring/dashboard.html:44
+msgid ""
+"Monitor your farms, track real-time water quality, and respond to alerts — "
+"all in one place."
+msgstr ""
+
+#: monitoring/templates/monitoring/dashboard.html:47
+#: monitoring/templates/monitoring/ponds.html:6
+#: monitoring/templates/monitoring/ponds.html:13
+msgid "Ponds Overview"
+msgstr "Aperçu des Bassins"
+
+#: monitoring/templates/monitoring/dashboard.html:57
+msgid "System Overview"
+msgstr "Aperçu du système"
+
+#: monitoring/templates/monitoring/dashboard.html:70
+msgid "Total Fish Stock"
+msgstr "Stock total de poissons"
+
+#: monitoring/templates/monitoring/dashboard.html:88
+msgid "Active Alerts"
+msgstr "Alertes Actives"
+
+#: monitoring/templates/monitoring/dashboard.html:108
+msgid "Good"
+msgstr "Bon"
+
+#: monitoring/templates/monitoring/dashboard.html:115
+msgid "Water Quality Index"
+msgstr "Indice Qualité de l'Eau"
+
+#: monitoring/templates/monitoring/dashboard.html:136
+msgid "Equipment Status"
+msgstr "État des équipements"
+
+#: monitoring/templates/monitoring/dashboard.html:145
+msgid "Quick Access"
+msgstr "Accès Rapide"
+
+#: monitoring/templates/monitoring/dashboard.html:156
+msgid "My Farms"
+msgstr "Mes Fermes"
+
+#: monitoring/templates/monitoring/dashboard.html:157
+msgid "Manage all sites"
+msgstr "Gérer les sites"
+
+#: monitoring/templates/monitoring/dashboard.html:173
+msgid "View water quality"
+msgstr "Voir la qualité de l'eau"
+
+#: monitoring/templates/monitoring/dashboard.html:189
+msgid "Resolve issues"
+msgstr "Résoudre les problèmes"
+
+#: monitoring/templates/monitoring/dashboard.html:205
+msgid "Settings & account"
+msgstr "Paramètres"
+
+#: monitoring/templates/monitoring/login.html:8
+msgid ""
+"AquaMonitor — Smart Aquaculture Monitoring System. Sign in to access your "
+"dashboard."
+msgstr ""
+
+#: monitoring/templates/monitoring/login.html:9
+#: monitoring/templates/monitoring/login.html:138
+msgid "Sign In"
+msgstr "Se connecter"
+
+#: monitoring/templates/monitoring/login.html:74
+msgid "Smart Aquaculture Monitoring"
+msgstr "Surveillance Intelligente de l'Aquaculture"
+
+#: monitoring/templates/monitoring/login.html:83
+msgid "Invalid username or password. Please try again."
+msgstr "Identifiant ou mot de passe invalide."
+
+#: monitoring/templates/monitoring/login.html:95
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+#: monitoring/templates/monitoring/login.html:102
+msgid "Enter your username"
+msgstr "Entrez votre nom"
+
+#: monitoring/templates/monitoring/login.html:112
+msgid "Password"
+msgstr "Mot de passe"
+
+#: monitoring/templates/monitoring/login.html:119
+msgid "Enter your password"
+msgstr "Entrez votre mot de passe"
+
+#: monitoring/templates/monitoring/login.html:126
+msgid "Toggle password visibility"
+msgstr ""
+
+#: monitoring/templates/monitoring/login.html:145
+msgid "AquaMonitor v1.0 — For authorized personnel only."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:5
+msgid "Live Monitor"
+msgstr "Moniteur en Direct"
+
+#: monitoring/templates/monitoring/pond_detail.html:35
+#: monitoring/templates/monitoring/pond_detail.html:279
+#: monitoring/templates/monitoring/ponds.html:24
+#: monitoring/templates/monitoring/ponds.html:59
+msgid "Normal"
+msgstr "Normal"
+
+#: monitoring/templates/monitoring/pond_detail.html:42
+#, python-format
+msgid "Updated %(time)s ago"
+msgstr "Mis à jour il y a %(time)s"
+
+#: monitoring/templates/monitoring/pond_detail.html:65
+msgid "AI Active"
+msgstr "IA Active"
+
+#: monitoring/templates/monitoring/pond_detail.html:73
+msgid "OFFLINE"
+msgstr "HORS LIGNE"
+
+#: monitoring/templates/monitoring/pond_detail.html:86
+msgid "No Live Stream"
+msgstr "Pas de flux"
+
+#: monitoring/templates/monitoring/pond_detail.html:87
+msgid "Configure a camera with .mp4 or .m3u8 URL."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:102
+msgid "IoT Readings"
+msgstr "Capteurs IoT"
+
+#: monitoring/templates/monitoring/pond_detail.html:106
+msgid "Live"
+msgstr "Direct"
+
+#: monitoring/templates/monitoring/pond_detail.html:144
+#: monitoring/templates/monitoring/pond_detail.html:183
+msgid "N/A"
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:157
+msgid "No IoT sensors linked."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:188
+msgid "No sensors linked."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:204
+msgid "24-Hour Sensor Trend"
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:205
+msgid "Temp & DO"
+msgstr "Temp & OD"
+
+#: monitoring/templates/monitoring/pond_detail.html:219
+msgid "Quick Actions"
+msgstr "Actions Rapides"
+
+#: monitoring/templates/monitoring/pond_detail.html:228
+msgid "Emergency Aerator"
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:235
+msgid "Generate 24hr Report"
+msgstr "Générer Rapport 24h"
+
+#: monitoring/templates/monitoring/pond_detail.html:244
+msgid "Calibrate Sensors"
+msgstr "Calibrer"
+
+#: monitoring/templates/monitoring/pond_detail.html:261
+msgid "Pond Overview"
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:267
+msgid "Fish Species"
+msgstr "Espèce"
+
+#: monitoring/templates/monitoring/pond_detail.html:272
+msgid "Fish Count"
+msgstr "Quantité"
+
+#: monitoring/templates/monitoring/pond_detail.html:288
+msgid "Last Updated"
+msgstr "Mis à jour"
+
+#: monitoring/templates/monitoring/pond_detail.html:300
+msgid "AI Detections"
+msgstr "Détections IA"
+
+#: monitoring/templates/monitoring/pond_detail.html:314
+msgid "Medium"
+msgstr "Moyen"
+
+#: monitoring/templates/monitoring/pond_detail.html:316
+msgid "Low"
+msgstr "Faible"
+
+#: monitoring/templates/monitoring/pond_detail.html:324
+#, python-format
+msgid "%(conf)s conf"
+msgstr "%(conf)s conf"
+
+#: monitoring/templates/monitoring/pond_detail.html:332
+msgid "No AI detections recorded."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:343
+msgid "Recent Alerts"
+msgstr "Alertes Récentes"
+
+#: monitoring/templates/monitoring/pond_detail.html:345
+msgid "View All"
+msgstr "Voir Tout"
+
+#: monitoring/templates/monitoring/pond_detail.html:358
+msgid "OPEN"
+msgstr "OUVERT"
+
+#: monitoring/templates/monitoring/pond_detail.html:384
+msgid "No alerts for this pond."
+msgstr ""
+
+#: monitoring/templates/monitoring/pond_detail.html:449
+msgid "Temperature (°C)"
+msgstr "Température (°C)"
+
+#: monitoring/templates/monitoring/pond_detail.html:462
+msgid "Dissolved Oxygen (mg/L)"
+msgstr "Oxygène dissous (mg/L)"
+
+#: monitoring/templates/monitoring/ponds.html:14
+msgid "Real-time water quality monitoring for all your ponds."
+msgstr ""
+
+#: monitoring/templates/monitoring/ponds.html:19
+msgid "Filter ponds by status"
+msgstr ""
+
+#: monitoring/templates/monitoring/ponds.html:78
+msgid "Sensor trend chart"
+msgstr ""
+
+#: monitoring/templates/monitoring/ponds.html:95
+msgid "Temp"
+msgstr "Temp"
+
+#: monitoring/templates/monitoring/ponds.html:112
+#, python-format
+msgid "%(fcount)s fish"
+msgstr "%(fcount)s poissons"
+
+#: monitoring/templates/monitoring/ponds.html:124
+msgid "View Live Monitor"
+msgstr "Voir le direct"
+
+#: monitoring/templates/monitoring/ponds.html:138
+msgid "No Ponds Found"
+msgstr "Aucun bassin"
+
+#: monitoring/templates/monitoring/ponds.html:139
+msgid ""
+"You haven't added any ponds to your farms yet. Start by creating a farm "
+"first."
+msgstr ""
+
+#: monitoring/templates/monitoring/ponds.html:141
+msgid "Go to Farms"
+msgstr "Aller aux fermes"

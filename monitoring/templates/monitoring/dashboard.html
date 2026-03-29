@@ -1,105 +1,139 @@
 {% extends 'monitoring/base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Dashboard Overview{% endblock %}
-{% block page_title %}Dashboard Overview{% endblock %}
+{% block title %}{% trans "Dashboard" %} — AquaMonitor{% endblock %}
+{% block page_title %}{% trans "Dashboard" %}{% endblock %}
 
 {% block content %}
 
-<!-- Top Status Banner -->
+<!-- Status Banner -->
 {% if banner_status == 'critical' %}
-<div class="alert alert-danger d-flex align-items-center mb-4 border-0 shadow-sm rounded-3 px-4 py-3" role="alert">
-  <i class="bi bi-exclamation-octagon-fill fs-3 me-4"></i>
-  <div>
-    <h5 class="fw-bold mb-1">{{ banner_message }}</h5>
-    {% if last_sync %}<div class="small opacity-75 mt-1">Last sensor sync: {{ last_sync|timesince }} ago</div>{% endif %}
+<div class="status-banner critical mb-4" role="alert">
+  <span class="status-banner-icon"><i class="bi bi-exclamation-octagon-fill"></i></span>
+  <div class="status-banner-text">
+    <div>{{ banner_message }}</div>
+    {% if last_sync %}<div class="status-banner-sub">{% blocktrans with time=last_sync|timesince %}Last sensor sync: {{ time }} ago{% endblocktrans %}</div>{% endif %}
   </div>
 </div>
 {% elif banner_status == 'warning' %}
-<div class="alert alert-warning d-flex align-items-center mb-4 border-0 shadow-sm rounded-3 px-4 py-3" role="alert">
-  <i class="bi bi-exclamation-triangle-fill fs-3 me-4"></i>
-  <div>
-    <h5 class="fw-bold mb-1">{{ banner_message }}</h5>
-    {% if last_sync %}<div class="small opacity-75 mt-1">Last sensor sync: {{ last_sync|timesince }} ago</div>{% endif %}
+<div class="status-banner warning mb-4" role="alert">
+  <span class="status-banner-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+  <div class="status-banner-text">
+    <div>{{ banner_message }}</div>
+    {% if last_sync %}<div class="status-banner-sub">{% blocktrans with time=last_sync|timesince %}Last sensor sync: {{ time }} ago{% endblocktrans %}</div>{% endif %}
   </div>
 </div>
 {% else %}
-<div class="alert alert-success d-flex align-items-center mb-4 border-0 shadow-sm rounded-3 px-4 py-3" role="alert" style="background-color: #d1e7dd; color: #0f5132;">
-  <i class="bi bi-check-circle-fill fs-3 me-4"></i>
-  <div>
-    <h5 class="fw-bold mb-1">{{ banner_message }}</h5>
-    {% if last_sync %}<div class="small mt-1" style="opacity: 0.85;">Last sensor sync: {{ last_sync|timesince }} ago</div>{% endif %}
+<div class="status-banner ok mb-4" role="alert">
+  <span class="status-banner-icon"><i class="bi bi-check-circle-fill"></i></span>
+  <div class="status-banner-text">
+    <div>{{ banner_message }}</div>
+    {% if last_sync %}<div class="status-banner-sub">{% blocktrans with time=last_sync|timesince %}Last sensor sync: {{ time }} ago{% endblocktrans %}</div>{% endif %}
   </div>
 </div>
 {% endif %}
 
-<!-- 4 Main Stats Cards -->
-<div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mb-5">
-  
-  <!-- 1. Total Fish Stock -->
+<!-- Hero Section -->
+<div class="dashboard-hero mb-4">
+  <div style="position: relative; z-index: 1;">
+    <p style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; opacity:0.65; margin:0 0 0.4rem;">
+      {% blocktrans with username=request.user.get_full_name|default:request.user.username %}Welcome back, {{ username }}{% endblocktrans %}
+    </p>
+    <h2>{% trans "Smart Aquaculture Command Center" %}</h2>
+    <p>{% trans "Monitor your farms, track real-time water quality, and respond to alerts — all in one place." %}</p>
+    <div class="hero-actions">
+      <a href="{% url 'ponds_list' %}" class="btn-hero-primary">
+        <i class="bi bi-grid"></i> {% trans "Ponds Overview" %}
+      </a>
+      <a href="{% url 'alerts_list' %}" class="btn-hero-outline">
+        <i class="bi bi-bell"></i> {% trans "Alert Center" %}
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- 4 Stat Cards -->
+<div class="section-title">{% trans "System Overview" %}</div>
+<div class="row row-cols-2 row-cols-xl-4 g-3 mb-4">
+
+  <!-- Total Fish Stock -->
   <div class="col">
-    <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift transition-all">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: rgba(13, 110, 253, 0.1); color: #0d6efd;">
-          <i class="bi bi-water fs-3"></i>
+    <div class="stat-card">
+      <div class="stat-card-top-bar" style="background: linear-gradient(90deg, #45B1E8, #2e5090);"></div>
+      <div class="stat-card-body">
+        <div class="stat-icon bg-accent-soft text-primary-custom">
+          <i class="bi bi-water"></i>
         </div>
         <div>
-          <h6 class="text-muted fw-semibold mb-1 text-uppercase tracking-wide" style="font-size: 0.75rem;">Total Fish Stock</h6>
-          <h3 class="fw-bold mb-0 text-dark">{{ total_fish_stock|default:"0" }}</h3>
+          <div class="stat-value">{{ total_fish_stock|default:"0" }}</div>
+          <div class="stat-label">{% trans "Total Fish Stock" %}</div>
         </div>
       </div>
     </div>
   </div>
-  
-  <!-- 2. Active Alerts -->
+
+  <!-- Active Alerts -->
   <div class="col">
-    <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift transition-all">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: rgba(220, 53, 69, 0.1); color: #dc3545;">
-          <i class="bi bi-bell-fill fs-3"></i>
+    <div class="stat-card">
+      <div class="stat-card-top-bar" style="background: linear-gradient(90deg, #ef4444, #f97316);"></div>
+      <div class="stat-card-body">
+        <div class="stat-icon bg-danger-soft" style="color: #ef4444;">
+          <i class="bi bi-bell-fill"></i>
         </div>
         <div>
-          <h6 class="text-muted fw-semibold mb-1 text-uppercase tracking-wide" style="font-size: 0.75rem;">Active Alerts</h6>
-          <h3 class="fw-bold mb-0 text-dark">{{ active_alerts_count|default:"0" }}</h3>
+          <div class="stat-value" style="color: {% if active_alerts_count > 0 %}#ef4444{% else %}#1a2744{% endif %};">
+            {{ active_alerts_count|default:"0" }}
+          </div>
+          <div class="stat-label">{% trans "Active Alerts" %}</div>
         </div>
       </div>
     </div>
   </div>
-  
-  <!-- 3. Water Quality Index -->
+
+  <!-- Water Quality Index -->
   <div class="col">
-    <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift transition-all">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: rgba(13, 202, 240, 0.1); color: #0dcaf0;">
-          <i class="bi bi-droplet-half fs-3"></i>
+    <div class="stat-card">
+      <div class="stat-card-top-bar"
+           style="background: {% if wqi_label == 'Good' %}linear-gradient(90deg, #10b981, #34d399){% elif wqi_label == 'Warning' %}linear-gradient(90deg, #f59e0b, #fbbf24){% else %}linear-gradient(90deg, #ef4444, #f87171){% endif %};"></div>
+      <div class="stat-card-body">
+        <div class="stat-icon"
+             style="background: {% if wqi_label == 'Good' %}#d1fae5; color:#10b981{% elif wqi_label == 'Warning' %}#fef3c7; color:#f59e0b{% else %}#fee2e2; color:#ef4444{% endif %};">
+          <i class="bi bi-droplet-half"></i>
         </div>
         <div>
-          <h6 class="text-muted fw-semibold mb-1 text-uppercase tracking-wide" style="font-size: 0.75rem;">Water Quality Index</h6>
           <div class="d-flex align-items-baseline gap-2">
-            <h3 class="fw-bold mb-0 text-dark">{{ water_quality_index|default:"0" }}%</h3>
+            <div class="stat-value">{{ water_quality_index|default:"0" }}%</div>
             {% if wqi_label == 'Good' %}
-               <span class="badge bg-success-soft text-success border border-success px-2 rounded-pill" style="font-size:0.65rem;">Good</span>
+              <span class="badge-status badge-normal" style="font-size:0.65rem;">{% trans "Good" %}</span>
             {% elif wqi_label == 'Warning' %}
-               <span class="badge bg-warning-soft text-warning border border-warning px-2 rounded-pill" style="font-size:0.65rem;">Warning</span>
+              <span class="badge-status badge-warning" style="font-size:0.65rem;">{% trans "Warning" %}</span>
             {% else %}
-               <span class="badge bg-danger-soft text-danger border border-danger px-2 rounded-pill" style="font-size:0.65rem;">Critical</span>
+              <span class="badge-status badge-critical" style="font-size:0.65rem;">{% trans "Critical" %}</span>
             {% endif %}
           </div>
+          <div class="stat-label">{% trans "Water Quality Index" %}</div>
         </div>
       </div>
     </div>
   </div>
-  
-  <!-- 4. Equipment Status -->
+
+  <!-- Equipment Status -->
   <div class="col">
-    <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift transition-all">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="rounded-circle p-3 me-3 d-flex align-items-center justify-content-center text-{{ equipment_label }}" style="width: 60px; height: 60px; background-color: var(--bs-{{ equipment_label }}-bg-subtle, rgba(0,0,0,0.05));">
-          <i class="bi bi-router-fill fs-3"></i>
+    <div class="stat-card">
+      <div class="stat-card-top-bar"
+           style="background: {% if equipment_label == 'success' %}linear-gradient(90deg, #10b981, #34d399){% elif equipment_label == 'warning' %}linear-gradient(90deg, #f59e0b, #fbbf24){% else %}linear-gradient(90deg, #ef4444, #f87171){% endif %};"></div>
+      <div class="stat-card-body">
+        <div class="stat-icon"
+             style="background: {% if equipment_label == 'success' %}#d1fae5; color:#10b981{% elif equipment_label == 'warning' %}#fef3c7; color:#f59e0b{% else %}#fee2e2; color:#ef4444{% endif %};">
+          <i class="bi bi-router-fill"></i>
         </div>
         <div>
-          <h6 class="text-muted fw-semibold mb-1 text-uppercase tracking-wide" style="font-size: 0.75rem;">Equipment Status</h6>
-          <h4 class="fw-bold mb-0 text-{{ equipment_label }}" style="font-size: 1.15rem;">{{ equipment_status }}</h4>
+          <div class="stat-value"
+               style="font-size:1.2rem; color:{% if equipment_label == 'success' %}#10b981{% elif equipment_label == 'warning' %}#f59e0b{% else %}#ef4444{% endif %};">
+            {{ equipment_status }}
+          </div>
+          <div class="stat-label">{% trans "Equipment Status" %}</div>
         </div>
       </div>
     </div>
@@ -107,29 +141,74 @@
 
 </div>
 
-<!-- Welcome Header Section (Replaces the boring old alert table) -->
-<div class="row">
-  <div class="col-12">
-    <div class="card border-0 shadow-sm rounded-4 bg-light overflow-hidden position-relative" style="min-height: 250px;">
-      <div class="card-body p-5 position-relative z-1 d-flex flex-column justify-content-center h-100">
-        <h3 class="fw-bold text-dark mb-3">Smart Aquaculture Command Center</h3>
-        <p class="text-muted mb-4 fs-6" style="max-width: 600px;">
-          Monitor total farm stock, evaluate real-time water quality indices, and secure your ponds with AI-powered cameras. 
-          Respond to active alerts natively through the dedicated Alert Center.
-        </p>
-        <div class="d-flex gap-3 mt-2 flex-wrap">
-            <a href="{% url 'ponds_list' %}" class="btn btn-primary rounded-pill px-4 py-2 fw-medium shadow-sm transition-all hover-lift">
-              <i class="bi bi-grid me-2"></i>Ponds Overview
-            </a>
-            <a href="{% url 'alerts_list' %}" class="btn btn-outline-secondary bg-white rounded-pill px-4 py-2 fw-medium transition-all hover-lift border-0 shadow-sm text-dark">
-              <i class="bi bi-bell me-2"></i>Go to Alert Center
-            </a>
+<!-- Quick Links Row -->
+<div class="section-title">{% trans "Quick Access" %}</div>
+<div class="row g-3 mb-2">
+
+  <!-- Farms -->
+  <div class="col-sm-6 col-xl-3">
+    <a href="{% url 'farms_list' %}" class="card card-hover text-decoration-none" style="border: none;">
+      <div class="card-body d-flex align-items-center gap-3 p-3">
+        <div class="stat-icon bg-primary-soft text-primary-custom" style="border-radius:12px;">
+          <i class="bi bi-geo-alt-fill"></i>
         </div>
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#1a2744;">{% trans "My Farms" %}</div>
+          <div style="font-size:0.75rem; color:#64748b;">{% trans "Manage all sites" %}</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto text-muted-custom"></i>
       </div>
-      <!-- Decorative icon background -->
-      <i class="bi bi-shield-check position-absolute text-secondary" style="font-size: 18rem; right: -2rem; bottom: -4rem; opacity: 0.04; transform: rotate(-10deg);"></i>
-    </div>
+    </a>
   </div>
+
+  <!-- Ponds -->
+  <div class="col-sm-6 col-xl-3">
+    <a href="{% url 'ponds_list' %}" class="card card-hover text-decoration-none" style="border: none;">
+      <div class="card-body d-flex align-items-center gap-3 p-3">
+        <div class="stat-icon bg-accent-soft text-primary-custom" style="border-radius:12px;">
+          <i class="bi bi-droplet-half"></i>
+        </div>
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#1a2744;">{% trans "Ponds" %}</div>
+          <div style="font-size:0.75rem; color:#64748b;">{% trans "View water quality" %}</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto text-muted-custom"></i>
+      </div>
+    </a>
+  </div>
+
+  <!-- Alerts -->
+  <div class="col-sm-6 col-xl-3">
+    <a href="{% url 'alerts_list' %}" class="card card-hover text-decoration-none" style="border: none;">
+      <div class="card-body d-flex align-items-center gap-3 p-3">
+        <div class="stat-icon bg-danger-soft" style="color:#ef4444; border-radius:12px;">
+          <i class="bi bi-bell-fill"></i>
+        </div>
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#1a2744;">{% trans "Alerts" %}</div>
+          <div style="font-size:0.75rem; color:#64748b;">{% trans "Resolve issues" %}</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto text-muted-custom"></i>
+      </div>
+    </a>
+  </div>
+
+  <!-- Profile -->
+  <div class="col-sm-6 col-xl-3">
+    <a href="{% url 'profile' %}" class="card card-hover text-decoration-none" style="border: none;">
+      <div class="card-body d-flex align-items-center gap-3 p-3">
+        <div class="stat-icon" style="background:#ede9fe; color:#7c3aed; border-radius:12px;">
+          <i class="bi bi-person-circle"></i>
+        </div>
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#1a2744;">{% trans "Profile" %}</div>
+          <div style="font-size:0.75rem; color:#64748b;">{% trans "Settings & account" %}</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto text-muted-custom"></i>
+      </div>
+    </a>
+  </div>
+
 </div>
 
 {% endblock %}

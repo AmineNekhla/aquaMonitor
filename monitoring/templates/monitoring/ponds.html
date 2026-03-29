@@ -1,164 +1,219 @@
 {% extends 'monitoring/base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Ponds Dashboard{% endblock %}
-{% block page_title %}Ponds Overview{% endblock %}
+{% block title %}{% trans "Ponds" %} — AquaMonitor{% endblock %}
+{% block page_title %}{% trans "Ponds Overview" %}{% endblock %}
 
 {% block content %}
-<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-5">
-  
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>{% trans "Ponds Overview" %}</h1>
+    <p>{% trans "Real-time water quality monitoring for all your ponds." %}</p>
+  </div>
+</div>
+
+<!-- Filter Pills -->
+<div class="filter-pills mb-4" id="pond-filters" role="tablist" aria-label="{% trans 'Filter ponds by status' %}">
+  <button class="filter-pill active" data-filter="all" aria-selected="true">
+    <i class="bi bi-grid-3x3-gap"></i> {% trans "All" %}
+  </button>
+  <button class="filter-pill" data-filter="normal">
+    <i class="bi bi-check-circle"></i> {% trans "Normal" %}
+  </button>
+  <button class="filter-pill" data-filter="warning">
+    <i class="bi bi-exclamation-triangle"></i> {% trans "Warning" %}
+  </button>
+  <button class="filter-pill" data-filter="critical">
+    <i class="bi bi-x-octagon"></i> {% trans "Critical" %}
+  </button>
+</div>
+
+<!-- Pond Cards Grid -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4" id="ponds-grid">
+
   {% for item in pond_data_list %}
-  <div class="col">
-    <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift transition-all">
-      <div class="card-body p-4 d-flex flex-column">
-        
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-start mb-3">
-          <div>
-            <h5 class="fw-bold mb-1 text-dark">{{ item.pond.name }}</h5>
-            <div class="text-muted small"><i class="bi bi-geo-alt me-1 text-primary"></i>{{ item.pond.farm.name }}</div>
-            <div class="text-secondary small mt-1">{% if item.pond.fish_species %}{{ item.pond.fish_species }}{% else %}Mixed Species{% endif %}</div>
+  <div class="col pond-col" data-status="{{ item.pond.status }}">
+    <div class="pond-card status-{{ item.pond.status }} h-100 d-flex flex-column" style="padding: 0;">
+
+      <!-- Card Top -->
+      <div style="padding: 1.1rem 1.1rem 0.75rem;">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div style="flex: 1; min-width: 0;">
+            <h2 style="font-size:1rem; font-weight:800; color:#1a2744; margin:0 0 0.2rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              {{ item.pond.name }}
+            </h2>
+            <div style="font-size:0.78rem; color:#64748b; display:flex; align-items:center; gap:0.25rem;">
+              <i class="bi bi-geo-alt" style="color:#45B1E8;"></i>
+              {{ item.pond.farm.name }}
+            </div>
+            {% if item.pond.fish_species %}
+            <div style="font-size:0.72rem; color:#94a3b8; margin-top:2px;">{{ item.pond.fish_species }}</div>
+            {% endif %}
           </div>
-          <div>
+          <div class="flex-shrink-0 ms-2">
             {% if item.pond.status == 'normal' %}
-              <span class="badge bg-success-soft text-success border border-success px-2 py-1 rounded-pill"><i class="bi bi-check-circle me-1"></i>Normal</span>
+              <span class="badge-status badge-normal">
+                <i class="bi bi-check-circle"></i> {% trans "Normal" %}
+              </span>
             {% elif item.pond.status == 'warning' %}
-              <span class="badge bg-warning-soft text-warning border border-warning px-2 py-1 rounded-pill"><i class="bi bi-exclamation-triangle me-1"></i>Warning</span>
+              <span class="badge-status badge-warning">
+                <i class="bi bi-exclamation-triangle"></i> {% trans "Warning" %}
+              </span>
             {% else %}
-              <span class="badge bg-danger-soft text-danger border border-danger px-2 py-1 rounded-pill"><i class="bi bi-x-octagon me-1"></i>Critical</span>
+              <span class="badge-status badge-critical">
+                <i class="bi bi-x-octagon"></i> {% trans "Critical" %}
+              </span>
             {% endif %}
           </div>
         </div>
-        
+
         <!-- Sparkline -->
-        <div class="mb-4 mt-2 w-100" style="height: 60px;">
-          <!-- Custom data attributes to inject the trend array and link status coloring -->
-          <canvas class="sparkline-canvas w-100 h-100" data-trend="{{ item.trend_data }}" data-status="{{ item.pond.status }}"></canvas>
+        <div style="height: 56px; margin: 0.5rem 0 0.75rem; position: relative;">
+          <canvas class="sparkline-canvas w-100 h-100"
+                  data-trend="{{ item.trend_data }}"
+                  data-status="{{ item.pond.status }}"
+                  aria-label="{% trans 'Sensor trend chart' %}"></canvas>
         </div>
-        
-        <!-- Metrics Row -->
-        <div class="row g-2 mb-4 mt-auto">
+      </div>
+
+      <!-- Metrics Row -->
+      <div style="padding: 0 1.1rem 1.1rem; flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+        <div class="row g-2 mb-3">
           <!-- DO -->
           <div class="col-4">
-            <div class="p-2 border rounded-3 text-center bg-light h-100 d-flex flex-column justify-content-center">
-              <div class="text-muted" style="font-size:0.65rem; font-weight:600; text-transform:uppercase;">
-                DO <span class="fw-normal">({{ item.do_unit|default:"mg/L" }})</span>
-              </div>
-              <div class="fw-bold text-dark mt-1 fs-5">{{ item.do_val }}</div>
+            <div class="metric-tile">
+              <div class="metric-tile-label">DO <span style="font-weight:400;">({{ item.do_unit|default:"mg/L" }})</span></div>
+              <div class="metric-tile-value">{{ item.do_val }}</div>
             </div>
           </div>
           <!-- TEMP -->
           <div class="col-4">
-            <div class="p-2 border rounded-3 text-center bg-light h-100 d-flex flex-column justify-content-center">
-              <div class="text-muted" style="font-size:0.65rem; font-weight:600; text-transform:uppercase;">
-                Temp <span class="fw-normal">({{ item.temp_unit|default:"°C" }})</span>
-              </div>
-              <div class="fw-bold text-dark mt-1 fs-5">{{ item.temp_val }}</div>
+            <div class="metric-tile">
+              <div class="metric-tile-label">{% trans "Temp" %} <span style="font-weight:400;">({{ item.temp_unit|default:"°C" }})</span></div>
+              <div class="metric-tile-value">{{ item.temp_val }}</div>
             </div>
           </div>
-          <!-- NH3/pH (Fallback) -->
+          <!-- pH -->
           <div class="col-4">
-            <div class="p-2 border rounded-3 text-center bg-light h-100 d-flex flex-column justify-content-center">
-              <div class="text-muted" style="font-size:0.65rem; font-weight:600; text-transform:uppercase;">
-                pH <span class="fw-normal">({{ item.ph_unit|default:"" }})</span>
-              </div>
-              <div class="fw-bold text-dark mt-1 fs-5">{{ item.ph_val }}</div>
+            <div class="metric-tile">
+              <div class="metric-tile-label">pH</div>
+              <div class="metric-tile-value">{{ item.ph_val }}</div>
             </div>
           </div>
         </div>
-        
-        <!-- Action -->
-        <a href="{% url 'pond_detail' item.pond.id %}" class="btn btn-outline-primary rounded-pill w-100 fw-medium transition-all">
-          View Details <i class="bi bi-arrow-right ms-1"></i>
+
+        <!-- Fish count badge -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+          <span style="font-size:0.75rem; color:#64748b;">
+            <i class="bi bi-water me-1" style="color:#45B1E8;"></i>
+            {% blocktrans with fcount=item.pond.fish_count|default:"—" %}{{ fcount }} fish{% endblocktrans %}
+          </span>
+          <span style="font-size:0.7rem; color:#94a3b8;">
+            <i class="bi bi-clock me-1"></i>
+            {% blocktrans with time=item.pond.last_updated|timesince %}{{ time }} ago{% endblocktrans %}
+          </span>
+        </div>
+
+        <!-- Action Button -->
+        <a href="{% url 'pond_detail' item.pond.id %}"
+           class="btn-primary-custom w-100 justify-content-center"
+           style="border-radius: 10px;">
+          {% trans "View Live Monitor" %} <i class="bi bi-arrow-right"></i>
         </a>
-        
       </div>
+
     </div>
   </div>
-  
+
   {% empty %}
   <div class="col-12">
-    <div class="card border-0 shadow-sm rounded-4 text-center p-5">
-      <div class="card-body">
-        <i class="bi bi-droplet text-secondary mb-3" style="font-size: 3rem;"></i>
-        <h4 class="fw-semibold text-dark">No Ponds Found</h4>
-        <p class="text-muted">You haven't added any ponds to your farms yet.</p>
-        <a href="{% url 'farms_list' %}" class="btn btn-primary rounded-pill px-4">Go to Farms</a>
+    <div class="card border-0" style="box-shadow: none;">
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="bi bi-droplet"></i>
+        </div>
+        <h4>{% trans "No Ponds Found" %}</h4>
+        <p>{% trans "You haven't added any ponds to your farms yet. Start by creating a farm first." %}</p>
+        <a href="{% url 'farms_list' %}" class="btn-primary-custom mt-2">
+          <i class="bi bi-geo-alt"></i> {% trans "Go to Farms" %}
+        </a>
       </div>
     </div>
   </div>
   {% endfor %}
-  
+
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- Include Chart.js for Sparklines -->
+<!-- Chart.js for Sparklines -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-  
-  // Find all sparkline canvases
-  const canvases = document.querySelectorAll('.sparkline-canvas');
-  
-  // Define colors based on pond status
+
+  // ── Sparklines ─────────────────────────────────────────────
   const statusColors = {
-    'normal': { border: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' },    // Green
-    'warning': { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.15)' },   // Orange
-    'critical': { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)' }    // Red
+    'normal':   { border: '#10b981', bg: 'rgba(16,185,129,0.12)' },
+    'warning':  { border: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+    'critical': { border: '#ef4444', bg: 'rgba(239,68,68,0.12)'  }
   };
-  
-  canvases.forEach(canvas => {
-    // Parse the data-trend attribute JSON
+
+  document.querySelectorAll('.sparkline-canvas').forEach(canvas => {
     const trendStr = canvas.getAttribute('data-trend');
-    const status = canvas.getAttribute('data-status') || 'normal';
-    
-    let trendData = [];
-    try {
-      if (trendStr) {
-        trendData = JSON.parse(trendStr);
-      }
-    } catch(e) {
-      console.error("Error parsing trend data", e);
-    }
-    
+    const status   = canvas.getAttribute('data-status') || 'normal';
+    let trendData  = [];
+    try { if (trendStr) trendData = JSON.parse(trendStr); } catch(e) {}
+
     const colors = statusColors[status] || statusColors['normal'];
-    // Generate simple sequential labels for the x-axis just so Chart.js can plot points
     const labels = trendData.map((_, i) => i);
-    
+
     new Chart(canvas, {
       type: 'line',
       data: {
-        labels: labels,
+        labels,
         datasets: [{
           data: trendData,
           borderColor: colors.border,
           backgroundColor: colors.bg,
           borderWidth: 2,
-          pointRadius: 0, // hide dots for a cleaner sparkline look
+          pointRadius: 0,
           pointHoverRadius: 4,
-          tension: 0.4, // smooth curve
+          tension: 0.4,
           fill: true
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false } // Disabled tooltips for cleaner sparkline feel
-        },
-        scales: {
-          x: { display: false }, // hide x axis completely
-          y: { display: false }  // hide y axis completely
-        },
-        layout: {
-          padding: 0
-        }
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { x: { display: false }, y: { display: false } },
+        layout: { padding: 0 }
       }
     });
   });
+
+  // ── Filter Pills ───────────────────────────────────────────
+  const pills  = document.querySelectorAll('.filter-pill');
+  const cols   = document.querySelectorAll('.pond-col');
+
+  pills.forEach(pill => {
+    pill.addEventListener('click', function() {
+      pills.forEach(p => { p.classList.remove('active'); p.setAttribute('aria-selected', 'false'); });
+      this.classList.add('active');
+      this.setAttribute('aria-selected', 'true');
+
+      const filter = this.getAttribute('data-filter');
+      cols.forEach(col => {
+        const status = col.getAttribute('data-status');
+        col.style.display = (filter === 'all' || status === filter) ? '' : 'none';
+      });
+    });
+  });
+
 });
 </script>
 {% endblock %}
