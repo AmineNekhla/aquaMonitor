@@ -5,7 +5,7 @@ Each model gets useful list_display, list_filter, and search_fields.
 """
 
 from django.contrib import admin
-from .models import Profile, Farm, Pond, Sensor, SensorReading, Camera, AIDetection, Alert, Forecast
+from .models import Profile, Farm, Pond, Sensor, SensorReading, Camera, AIDetection, Alert, Forecast, ESPDevice, DeviceCommand
 
 
 # ─── Inline: SensorReadings inside Sensor ────────────────────────────────────
@@ -96,3 +96,19 @@ class AlertAdmin(admin.ModelAdmin):
 class ForecastAdmin(admin.ModelAdmin):
     list_display = ('pond', 'target_time', 'temp', 'status')
     list_filter = ('status', 'pond')
+
+# ─── ESPDevice ────────────────────────────────────────────────────────────────
+@admin.register(ESPDevice)
+class ESPDeviceAdmin(admin.ModelAdmin):
+    list_display  = ('id', 'name', 'mac_address', 'farm', 'status', 'last_heartbeat', 'created_at')
+    list_filter   = ('status', 'farm')
+    search_fields = ('name', 'mac_address', 'farm__name')
+    readonly_fields = ('api_key', 'created_at', 'last_heartbeat')
+
+# ─── DeviceCommand ────────────────────────────────────────────────────────────
+@admin.register(DeviceCommand)
+class DeviceCommandAdmin(admin.ModelAdmin):
+    list_display  = ('device', 'command_name', 'status', 'message_id', 'created_at', 'expires_at')
+    list_filter   = ('status', 'command_name')
+    search_fields = ('device__name', 'message_id')
+    readonly_fields = ('created_at', 'acknowledged_at')
