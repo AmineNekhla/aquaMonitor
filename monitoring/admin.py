@@ -33,7 +33,7 @@ class ProfileAdmin(admin.ModelAdmin):
 # ─── Farm ─────────────────────────────────────────────────────────────────────
 @admin.register(Farm)
 class FarmAdmin(admin.ModelAdmin):
-    list_display  = ('name', 'owner', 'location', 'status', 'created_at')
+    list_display  = ('name', 'owner', 'latitude', 'longitude', 'status', 'created_at')
     list_filter   = ('status',)
     search_fields = ('name', 'location', 'owner__username')
 

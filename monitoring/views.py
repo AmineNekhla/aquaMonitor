@@ -9,6 +9,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from datetime import timedelta
 from django.http import JsonResponse, HttpResponse
+from django.urls import reverse
+from django.utils.timesince import timesince
 import csv
 import json
 from django.contrib.auth.decorators import login_required
@@ -156,6 +158,8 @@ def create_farm(request):
 
 
 
+from .services.weather import get_current_weather
+
 @login_required
 def farm_detail(request, farm_id):
     """
@@ -165,7 +169,11 @@ def farm_detail(request, farm_id):
     """
     farm  = get_object_or_404(Farm, id=farm_id, owner=request.user)
     ponds = Pond.objects.filter(farm=farm)
-    return render(request, 'monitoring/farm_detail.html', {'farm': farm, 'ponds': ponds})
+    
+    return render(request, 'monitoring/farm_detail.html', {
+        'farm': farm, 
+        'ponds': ponds
+    })
 
 
 @login_required
@@ -472,3 +480,92 @@ def profile(request):
         form = ProfileForm(instance=user_profile, user=request.user)
 
     return render(request, 'monitoring/profile.html', {'form': form, 'profile': user_profile})
+
+
+# ─── Geospatial Map Center ────────────────────────────────────────────────────
+@login_required
+def global_map(request):
+    """
+    Dedicated map interface showing all farms.
+    """
+    user_farms = Farm.objects.filter(owner=request.user)
+    user_ponds = Pond.objects.filter(farm__in=user_farms)
+    
+    # Global Overview Metrics
+    active_alerts = Alert.objects.filter(pond__in=user_ponds, status='open')
+    
+    crit_count = active_alerts.filter(severity='critical').count()
+    warn_count = active_alerts.filter(severity='warning').count()
+    global_status = 'normal'
+    if crit_count > 0:
+        global_status = 'critical'
+    elif warn_count > 0:
+        global_status = 'warning'
+        
+    # Valid Map Markers
+    markers = []
+    valid_farms = user_farms.filter(latitude__isnull=False, longitude__isnull=False)
+    for farm in valid_farms:
+        farm_alerts = active_alerts.filter(pond__farm=farm)
+        fm_crit = farm_alerts.filter(severity='critical').count()
+        fm_warn = farm_alerts.filter(severity='warning').count()
+        
+        status = 'normal'
+        if fm_crit > 0:
+            status = 'critical'
+        elif fm_warn > 0:
+            status = 'warning'
+            
+        markers.append({
+            'id': farm.id,
+            'name': farm.name,
+            'lat': farm.latitude,
+            'lon': farm.longitude,
+            'status': status
+        })
+                    
+    context = {
+        'total_farms': user_farms.count(),
+        'total_ponds': user_ponds.count(),
+        'alerts_count': active_alerts.count(),
+        'global_status': global_status,
+        'markers_json': json.dumps(markers),
+    }
+    return render(request, 'monitoring/map.html', context)
+
+
+@login_required
+def map_farm_context(request, farm_id):
+    """
+    AJAX Endpoint: Fetches live contextual details when a farm marker is clicked.
+    """
+    farm = get_object_or_404(Farm, id=farm_id, owner=request.user)
+    
+    # Weather
+    weather_data = {"error": True, "message": "No coordinates assigned to this farm"}
+    if farm.latitude is not None and farm.longitude is not None:
+        weather_data = get_current_weather(farm.latitude, farm.longitude)
+            
+    # Ponds Summary
+    ponds = Pond.objects.filter(farm=farm)
+    ponds_data = [{'name': p.name, 'status': p.status, 'fish_count': p.fish_count} for p in ponds]
+    
+    # Recent Active Alerts
+    alerts = Alert.objects.filter(pond__farm=farm, status='open').order_by('-created_at')[:4]
+    alerts_data = []
+    for a in alerts:
+        alerts_data.append({
+            'title': a.title,
+            'severity': a.severity,
+            'pond': a.pond.name,
+            'time_ago': f"{timesince(a.created_at)} ago"
+        })
+        
+    return JsonResponse({
+        'farm_name': farm.name,
+        'farm_url': reverse('farm_detail', args=[farm.id]),
+        'weather': weather_data,
+        'ponds': ponds_data,
+        'alerts': alerts_data
+    })
+

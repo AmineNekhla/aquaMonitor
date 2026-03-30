@@ -2,13 +2,13 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-29 06:13+0000\n"
+"POT-Creation-Date: 2026-03-29 13:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,22 +19,21 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: aquaculture/settings.py:103
+#: aquaculture/settings.py:104
 msgid "English"
 msgstr ""
 
-#: aquaculture/settings.py:104
+#: aquaculture/settings.py:105
 msgid "French"
 msgstr ""
 
-#: aquaculture/settings.py:105
+#: aquaculture/settings.py:106
 msgid "Arabic"
 msgstr ""
 
 #: monitoring/templates/monitoring/alerts.html:4
-#: monitoring/templates/monitoring/base.html:62
-#: monitoring/templates/monitoring/base.html:158
-#: monitoring/templates/monitoring/base.html:350
+#: monitoring/templates/monitoring/base.html:65
+#: monitoring/templates/monitoring/base.html:168
 #: monitoring/templates/monitoring/dashboard.html:188
 msgid "Alerts"
 msgstr "التنبيهات"
@@ -110,8 +109,10 @@ msgstr "التاريخ"
 
 #: monitoring/templates/monitoring/alerts.html:81
 #: monitoring/templates/monitoring/alerts.html:137
-#: monitoring/templates/monitoring/base.html:254
+#: monitoring/templates/monitoring/base.html:264
 #: monitoring/templates/monitoring/dashboard.html:112
+#: monitoring/templates/monitoring/map.html:129
+#: monitoring/templates/monitoring/map.html:270
 #: monitoring/templates/monitoring/pond_detail.html:39
 #: monitoring/templates/monitoring/pond_detail.html:283
 #: monitoring/templates/monitoring/pond_detail.html:310
@@ -123,7 +124,7 @@ msgstr "حرج"
 
 #: monitoring/templates/monitoring/alerts.html:83
 #: monitoring/templates/monitoring/alerts.html:139
-#: monitoring/templates/monitoring/base.html:256
+#: monitoring/templates/monitoring/base.html:266
 #: monitoring/templates/monitoring/pond_detail.html:312
 #: monitoring/templates/monitoring/pond_detail.html:369
 msgid "High"
@@ -131,8 +132,10 @@ msgstr "عالي"
 
 #: monitoring/templates/monitoring/alerts.html:85
 #: monitoring/templates/monitoring/alerts.html:141
-#: monitoring/templates/monitoring/base.html:258
+#: monitoring/templates/monitoring/base.html:268
 #: monitoring/templates/monitoring/dashboard.html:110
+#: monitoring/templates/monitoring/map.html:127
+#: monitoring/templates/monitoring/map.html:269
 #: monitoring/templates/monitoring/pond_detail.html:37
 #: monitoring/templates/monitoring/pond_detail.html:281
 #: monitoring/templates/monitoring/pond_detail.html:371
@@ -143,7 +146,7 @@ msgstr "تحذير"
 
 #: monitoring/templates/monitoring/alerts.html:87
 #: monitoring/templates/monitoring/alerts.html:143
-#: monitoring/templates/monitoring/base.html:260
+#: monitoring/templates/monitoring/base.html:270
 #: monitoring/templates/monitoring/pond_detail.html:373
 msgid "Info"
 msgstr "معلومة"
@@ -161,7 +164,7 @@ msgid "Done"
 msgstr "تم"
 
 #: monitoring/templates/monitoring/alerts.html:163
-#: monitoring/templates/monitoring/base.html:248
+#: monitoring/templates/monitoring/base.html:258
 #: monitoring/templates/monitoring/pond_detail.html:148
 #: monitoring/templates/monitoring/pond_detail.html:323
 #: monitoring/templates/monitoring/pond_detail.html:376
@@ -187,76 +190,78 @@ msgid "View Ponds"
 msgstr "عرض الأحواض"
 
 #: monitoring/templates/monitoring/base.html:51
-#: monitoring/templates/monitoring/base.html:131
+#: monitoring/templates/monitoring/base.html:134
 msgid "Main"
 msgstr "الرئيسية"
 
 #: monitoring/templates/monitoring/base.html:53
-#: monitoring/templates/monitoring/base.html:137
-#: monitoring/templates/monitoring/base.html:326
+#: monitoring/templates/monitoring/base.html:140
 #: monitoring/templates/monitoring/dashboard.html:5
 #: monitoring/templates/monitoring/dashboard.html:6
 msgid "Dashboard"
 msgstr "لوحة القيادة"
 
 #: monitoring/templates/monitoring/base.html:56
-#: monitoring/templates/monitoring/base.html:144
-#: monitoring/templates/monitoring/base.html:333
+#: monitoring/templates/monitoring/base.html:147
+msgid "Map View"
+msgstr "عرض الخريطة"
+
+#: monitoring/templates/monitoring/base.html:59
+#: monitoring/templates/monitoring/base.html:154
 #: monitoring/templates/monitoring/pond_detail.html:13
 msgid "Farms"
 msgstr "المزارع"
 
-#: monitoring/templates/monitoring/base.html:59
-#: monitoring/templates/monitoring/base.html:151
-#: monitoring/templates/monitoring/base.html:340
+#: monitoring/templates/monitoring/base.html:62
+#: monitoring/templates/monitoring/base.html:161
 #: monitoring/templates/monitoring/dashboard.html:172
+#: monitoring/templates/monitoring/map.html:235
 #: monitoring/templates/monitoring/ponds.html:5
 msgid "Ponds"
 msgstr "الأحواض"
 
-#: monitoring/templates/monitoring/base.html:66
+#: monitoring/templates/monitoring/base.html:69
 msgid "Account"
 msgstr "الحساب"
 
-#: monitoring/templates/monitoring/base.html:68
-#: monitoring/templates/monitoring/base.html:171
-#: monitoring/templates/monitoring/base.html:357
+#: monitoring/templates/monitoring/base.html:71
+#: monitoring/templates/monitoring/base.html:181
 #: monitoring/templates/monitoring/dashboard.html:204
 msgid "Profile"
 msgstr "الملف الشخصي"
 
-#: monitoring/templates/monitoring/base.html:73
-#: monitoring/templates/monitoring/base.html:178
+#: monitoring/templates/monitoring/base.html:76
+#: monitoring/templates/monitoring/base.html:188
 msgid "Logout"
 msgstr "تسجيل الخروج"
 
-#: monitoring/templates/monitoring/base.html:196
+#: monitoring/templates/monitoring/base.html:206
 msgid "Open menu"
 msgstr "فتح القائمة"
 
-#: monitoring/templates/monitoring/base.html:205
+#: monitoring/templates/monitoring/base.html:215
 msgid "Switch language"
 msgstr "تغيير اللغة"
 
-#: monitoring/templates/monitoring/base.html:209
+#: monitoring/templates/monitoring/base.html:219
 #: monitoring/templates/monitoring/login.html:33
 msgid "Select language"
 msgstr "اختر اللغة"
 
-#: monitoring/templates/monitoring/base.html:220
-#: monitoring/templates/monitoring/base.html:229
+#: monitoring/templates/monitoring/base.html:230
+#: monitoring/templates/monitoring/base.html:239
 msgid "Notifications"
 msgstr "الإشعارات"
 
-#: monitoring/templates/monitoring/base.html:233
+#: monitoring/templates/monitoring/base.html:243
 msgid "Mark all read"
 msgstr ""
 
-#: monitoring/templates/monitoring/base.html:268
+#: monitoring/templates/monitoring/base.html:278
 msgid "No new notifications"
 msgstr "لا توجد إشعارات جديدة"
 
-#: monitoring/templates/monitoring/base.html:276
+#: monitoring/templates/monitoring/base.html:286
 msgid "View all alerts"
 msgstr "عرض جميع التنبيهات"
 
@@ -297,6 +302,7 @@ msgid "Total Fish Stock"
 msgstr "إجمالي مخزون الأسماك"
 
 #: monitoring/templates/monitoring/dashboard.html:88
+#: monitoring/templates/monitoring/map.html:157
 msgid "Active Alerts"
 msgstr "التنبيهات النشطة"
 
@@ -379,16 +385,139 @@ msgstr ""
 msgid "AquaMonitor v1.0 — For authorized personnel only."
 msgstr ""
 
-#: monitoring/templates/monitoring/pond_detail.html:5
-msgid "Live Monitor"
-msgstr "مراقب مباشر"
+#: monitoring/templates/monitoring/map.html:4
+msgid "Geospatial Map – AquaMonitor"
+msgstr "الخريطة الجيومكانية – AquaMonitor"
 
+#: monitoring/templates/monitoring/map.html:5
+#, fuzzy
+#| msgid "Alert Center"
+msgid "Geospatial Center"
+msgstr "مركز التنبيهات"
+
+#: monitoring/templates/monitoring/map.html:123
+#, fuzzy
+#| msgid "Ponds Overview"
+msgid "Network Overview"
+msgstr "نظرة عامة على الأحواض"
+
+#: monitoring/templates/monitoring/map.html:125
+msgid "Healthy"
+msgstr "سليم"
+
+#: monitoring/templates/monitoring/map.html:136
+msgid "Interactive Map"
+msgstr "خريطة تفاعلية"
+
+#: monitoring/templates/monitoring/map.html:137
+msgid "Select a farm marker to view active telemetry and alerts."
+msgstr "حدد علامة مزرعة لعرض القياسات عن بعد والتنبيهات النشطة."
+
+#: monitoring/templates/monitoring/map.html:141
+msgid "Infrastructure Summary"
+msgstr "ملخص البنية التحتية"
+
+#: monitoring/templates/monitoring/map.html:146
+#, fuzzy
+#| msgid "Go to Farms"
+msgid "Total Farms"
+msgstr "الذهاب إلى المزارع"
+
+#: monitoring/templates/monitoring/map.html:152
+#, fuzzy
+#| msgid "View Ponds"
+msgid "Active Ponds"
+msgstr "عرض الأحواض"
+
+#: monitoring/templates/monitoring/map.html:178
+#, fuzzy
+#| msgid "Farm"
+msgid "Farm Name"
+msgstr "المزرعة"
+
+#: monitoring/templates/monitoring/map.html:188
+msgid "Local Weather"
+msgstr "الطقس المحلي"
+
+#: monitoring/templates/monitoring/map.html:189
+#, fuzzy
+#| msgid "Notifications"
+msgid "Location"
+msgstr "الإشعارات"
+
+#: monitoring/templates/monitoring/map.html:204
+#, fuzzy
+#| msgid "IoT Readings"
+msgid "Loading"
+msgstr "قراءات IoT"
+
+#: monitoring/templates/monitoring/map.html:206
+msgid "Humidity"
+msgstr "الرطوبة"
+
+#: monitoring/templates/monitoring/map.html:223
+msgid "Wind Conditions"
+msgstr "حالة الرياح"
+
+#: monitoring/templates/monitoring/map.html:224
+#, fuzzy
+#| msgid "AI Detections"
+msgid "Direction"
+msgstr "اكتشافات الذكاء الاصطناعي"
+
+#: monitoring/templates/monitoring/map.html:228
+#: monitoring/templates/monitoring/map.html:265
+msgid "Gusts:"
+msgstr "هبات الرياح:"
+
+#: monitoring/templates/monitoring/map.html:243
+#: monitoring/templates/monitoring/pond_detail.html:343
+msgid "Recent Alerts"
+msgstr "التنبيهات الأخيرة"
+
+#: monitoring/templates/monitoring/map.html:250
+#, fuzzy
+#| msgid "My Farms"
+msgid "Manage Farm"
+msgstr "مزارعي"
+
+#: monitoring/templates/monitoring/map.html:264
+msgid "Unknown"
+msgstr "غير معروف"
+
+#: monitoring/templates/monitoring/map.html:266
+msgid "km/h"
+msgstr "كم/س"
+
+#: monitoring/templates/monitoring/map.html:267
+#, fuzzy
+#| msgid "No Ponds Found"
+msgid "No ponds configured."
+msgstr "لا توجد أحواض"
+
+#: monitoring/templates/monitoring/map.html:268
 #: monitoring/templates/monitoring/pond_detail.html:35
 #: monitoring/templates/monitoring/pond_detail.html:279
 #: monitoring/templates/monitoring/ponds.html:24
 #: monitoring/templates/monitoring/ponds.html:59
 msgid "Normal"
 msgstr "طبيعي"
+
+#: monitoring/templates/monitoring/map.html:271
+msgid "Fish"
+msgstr "أسماك"
+
+#: monitoring/templates/monitoring/map.html:272
+msgid "All systems clear"
+msgstr "جميع الأنظمة تعمل بشكل جيد"
+
+#: monitoring/templates/monitoring/map.html:273
+msgid "Failed to load payload"
+msgstr "فشل في تحميل البيانات"
+
+#: monitoring/templates/monitoring/pond_detail.html:5
+msgid "Live Monitor"
+msgstr "مراقب مباشر"
 
 #: monitoring/templates/monitoring/pond_detail.html:42
 #, python-format
@@ -492,10 +621,6 @@ msgstr "%(conf)s ثقة"
 #: monitoring/templates/monitoring/pond_detail.html:332
 msgid "No AI detections recorded."
 msgstr ""
-
-#: monitoring/templates/monitoring/pond_detail.html:343
-msgid "Recent Alerts"
-msgstr "التنبيهات الأخيرة"
 
 #: monitoring/templates/monitoring/pond_detail.html:345
 msgid "View All"

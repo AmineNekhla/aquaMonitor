@@ -395,84 +395,10 @@ body {
 /* ── Content Area ───────────────────────────────────────────── */
 .content-area {
   flex: 1;
-  padding: 1.75rem 1.75rem 5rem; /* extra bottom for bottom nav */
+  padding: 1.75rem 1.75rem 1.75rem; 
 }
 
-/* ══════════════════════════════════════════════════════════════
-   BOTTOM NAVIGATION (Mobile only)
-════════════════════════════════════════════════════════════════ */
-.bottom-nav {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--bottom-nav-h);
-  background: #fff;
-  border-top: 1px solid var(--border-color);
-  z-index: 1050;
-  padding: 0 0.5rem;
-  box-shadow: 0 -4px 16px rgba(46, 80, 144, 0.1);
-}
 
-.bottom-nav-inner {
-  display: flex;
-  align-items: stretch;
-  height: 100%;
-  gap: 0;
-}
-
-.bottom-nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  color: var(--text-light);
-  font-size: 0.62rem;
-  font-weight: 600;
-  gap: 3px;
-  transition: var(--transition);
-  border-radius: 10px;
-  padding: 0.4rem 0.2rem;
-  position: relative;
-}
-
-.bottom-nav-item i {
-  font-size: 1.25rem;
-  line-height: 1;
-}
-
-.bottom-nav-item.active {
-  color: var(--primary);
-}
-
-.bottom-nav-item.active i {
-  color: var(--accent);
-}
-
-.bottom-nav-item:hover {
-  color: var(--primary);
-  background: var(--accent-light);
-}
-
-.bottom-nav-badge {
-  position: absolute;
-  top: 4px;
-  right: calc(50% - 14px);
-  background: var(--danger);
-  color: #fff;
-  font-size: 0.5rem;
-  font-weight: 700;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1.5px solid #fff;
-}
 
 /* ══════════════════════════════════════════════════════════════
    CARDS
@@ -1415,10 +1341,9 @@ body {
 @media (max-width: 767px) {
   .sidebar { display: none; }
   .btn-hamburger { display: flex; align-items: center; }
-  .bottom-nav { display: flex; }
 
   .content-area {
-    padding: 1rem 1rem 5.5rem;
+    padding: 1rem 1rem 1.5rem;
   }
 
   .topbar { padding: 0 1rem; }

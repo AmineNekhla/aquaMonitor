@@ -1,0 +1,463 @@
+{% extends 'monitoring/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Geospatial Map – AquaMonitor" %}{% endblock %}
+{% block page_title %}{% trans "Geospatial Center" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+/* Override base padding for map page to make it full height */
+.content-area {
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+/* Ensure the wrapper calculates 100vh minus the 60px topbar */
+.map-container-row {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 60px); 
+}
+@media (max-width: 767px) {
+    .map-container-row {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 60px);
+    }
+}
+.map-col {
+    flex: 1;
+    position: relative;
+    /* Map area remains LTR always */
+    direction: ltr !important; 
+}
+@media (max-width: 767px) {
+    .map-col {
+        min-height: 50vh;
+    }
+}
+.side-col {
+    width: 380px;
+    background: #fff;
+    border-inline-start: 1px solid var(--border-color);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+@media (max-width: 767px) {
+    .side-col {
+        width: 100%;
+        height: auto;
+        min-height: 50vh;
+        border-inline-start: none;
+        border-top: 1px solid var(--border-color);
+    }
+}
+
+.map-layer {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1;
+}
+
+/* Marker Styles */
+.custom-marker {
+    background: none;
+    border: none;
+}
+.marker-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -15px 0 0 -15px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    border: 2px solid #fff;
+}
+.marker-pin.normal { background: #10b981; }
+.marker-pin.warning { background: #f59e0b; }
+.marker-pin.critical { background: #ef4444; }
+
+.side-panel-header {
+    background: var(--body-bg);
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.side-panel-body {
+    padding: 1.25rem;
+    flex: 1;
+}
+
+/* Skeleton Loading */
+.skeleton {
+    background: #e2e8f0;
+    border-radius: 6px;
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0.6; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="map-container-row">
+    <!-- Main Map Area -->
+    <div class="map-col">
+        <div id="global-map" class="map-layer"></div>
+    </div>
+    
+    <!-- Contextual Side Panel -->
+    <div class="side-col" id="app-side-panel">
+        
+        <!-- INITIAL OVERVIEW STATE -->
+        <div id="panel-overview">
+            <div class="side-panel-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">{% trans "Network Overview" %}</h5>
+                {% if global_status == 'normal' %}
+                    <span class="badge bg-success">{% trans "Healthy" %}</span>
+                {% elif global_status == 'warning' %}
+                    <span class="badge bg-warning text-dark">{% trans "Warning" %}</span>
+                {% else %}
+                    <span class="badge bg-danger">{% trans "Critical" %}</span>
+                {% endif %}
+            </div>
+            <div class="side-panel-body pb-0">
+                <div class="alert alert-info border-0 bg-primary-soft text-primary-custom d-flex align-items-center gap-2 mb-4 shadow-sm" role="alert">
+                    <i class="bi bi-pin-map-fill fs-5"></i> 
+                    <div>
+                        <strong class="d-block text-dark">{% trans "Interactive Map" %}</strong>
+                        {% blocktrans %}Select a farm marker to view active telemetry and alerts.{% endblocktrans %}
+                    </div>
+                </div>
+                
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 0.05em;">{% trans "Infrastructure Summary" %}</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <div class="bg-body border rounded p-3 text-center h-100 d-flex flex-column justify-content-center">
+                            <h3 class="fw-bold mb-1">{{ total_farms }}</h3>
+                            <span class="text-muted small">{% trans "Total Farms" %}</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-body border rounded p-3 text-center h-100 d-flex flex-column justify-content-center">
+                            <h3 class="fw-bold mb-1">{{ total_ponds }}</h3>
+                            <span class="text-muted small">{% trans "Active Ponds" %}</span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="bg-body border rounded p-3 d-flex justify-content-between align-items-center">
+                            <span class="text-muted fw-medium"><i class="bi bi-bell me-2"></i>{% trans "Active Alerts" %}</span>
+                            <span class="badge {% if alerts_count > 0 %}bg-danger{% else %}bg-success{% endif %} rounded-pill fs-6 px-3 shadow-sm">{{ alerts_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FARM DETAIL STATE (Hidden initially) -->
+        <div id="panel-farm-details" class="d-none h-100 d-flex flex-column">
+            <!-- Loading Overlay -->
+            <div id="panel-loader" class="p-4 d-flex flex-column gap-3 h-100">
+                <div class="skeleton w-75" style="height: 24px;"></div>
+                <div class="skeleton w-100 mt-2" style="height: 120px;"></div>
+                <div class="skeleton w-100" style="height: 80px;"></div>
+                <div class="skeleton w-100" style="height: 80px;"></div>
+            </div>
+
+            <!-- Content -->
+            <div id="panel-content" class="d-none pb-4">
+                <div class="side-panel-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-truncate pe-2" id="ctx-farm-name">{% trans "Farm Name" %}</h5>
+                    <button class="btn btn-sm btn-outline-secondary border-0" onclick="resetPanel()">
+                        <!-- Close button requires explicit LTR arrow if you like, else X is universal -->
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                
+                <div class="side-panel-body">
+                    <!-- Location / Weather Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-uppercase text-muted fw-bold mb-0" style="font-size: 0.75rem; letter-spacing: 0.05em;">{% trans "Local Weather" %}</h6>
+                        <span id="ctx-w-location" class="badge bg-light text-secondary border shadow-sm px-2"><i class="bi bi-geo-alt-fill text-muted"></i> {% trans "Location" %}</span>
+                    </div>
+
+                    <!-- Weather Widget -->
+                    <div class="card border-0 bg-primary text-white text-center mb-3 shadow" id="ctx-weather-box" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);">
+                        <div class="card-body p-3">
+                            <div id="ctx-weather-error" class="d-none">
+                                <i class="bi bi-cloud-slash display-4 opacity-50"></i>
+                                <p class="small text-white-50 mt-2 mb-0" id="ctx-weather-msg"></p>
+                            </div>
+                            <div id="ctx-weather-data">
+                                <div class="d-flex align-items-center justify-content-center gap-3">
+                                    <img src="" id="ctx-w-icon" width="60" alt="Weather" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">
+                                    <h2 class="display-5 fw-bold mb-0" id="ctx-w-temp" dir="ltr">--°C</h2>
+                                </div>
+                                <p class="fs-6 mb-2 fw-medium text-capitalize mt-n1" id="ctx-w-desc">{% trans "Loading" %}</p>
+                                <div class="d-flex justify-content-center gap-4 border-top border-light border-opacity-25 pt-2 text-white-75 small fw-medium">
+                                    <span><i class="bi bi-droplet me-1"></i> <span id="ctx-w-hum" dir="ltr">--</span>% {% trans "Humidity" %}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 24h Forecast Row -->
+                    <div id="ctx-forecast-section" class="mb-3">
+                        <div class="row g-2" id="ctx-forecast-cards">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Wind Conditions Card -->
+                    <div id="ctx-wind-section" class="card border border-light bg-body shadow-sm mb-4">
+                        <div class="card-body p-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-wind text-muted me-2"></i>{% trans "Wind Conditions" %}</h6>
+                                <span class="small text-muted" id="ctx-wind-dir">{% trans "Direction" %}</span>
+                            </div>
+                            <div class="text-end">
+                                <h4 class="mb-0 fw-bold text-primary" id="ctx-wind-speed" dir="ltr">0 km/h</h4>
+                                <span class="small text-muted" id="ctx-wind-gust" dir="ltr">{% trans "Gusts:" %} 0 km/h</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ponds -->
+                    <h6 class="text-uppercase text-muted fw-bold mb-3 d-flex justify-content-between align-items-center" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                        {% trans "Ponds" %} <span class="badge bg-secondary rounded-pill" id="ctx-ponds-count">0</span>
+                    </h6>
+                    <div class="list-group mb-4 shadow-sm" id="ctx-ponds-list">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Alerts -->
+                    <h6 class="text-uppercase text-muted fw-bold mb-3 d-flex justify-content-between align-items-center" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                        {% trans "Recent Alerts" %}
+                    </h6>
+                    <div id="ctx-alerts-list" class="mb-4">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <a href="#" id="ctx-manage-btn" class="btn btn-primary-custom w-100 justify-content-center shadow-sm">
+                        {% trans "Manage Farm" %} <i class="bi bi-arrow-right d-none d-ltr-inline"></i><i class="bi bi-arrow-left d-none d-rtl-inline"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // i18n Dictionary for injectible JS Strings
+    {% trans "Unknown" as tr_unknown %}
+    {% trans "Gusts:" as tr_gusts %}
+    {% trans "km/h" as tr_kmh %}
+    {% trans "No ponds configured." as tr_no_ponds %}
+    {% trans "Normal" as tr_normal %}
+    {% trans "Warning" as tr_warning %}
+    {% trans "Critical" as tr_critical %}
+    {% trans "Fish" as tr_fish %}
+    {% trans "All systems clear" as tr_all_clear %}
+    {% trans "Failed to load payload" as tr_failed %}
+    const i18n = {
+        unknown: "{{ tr_unknown|escapejs }}",
+        gusts: "{{ tr_gusts|escapejs }}",
+        kmh: "{{ tr_kmh|escapejs }}",
+        noPonds: "{{ tr_no_ponds|escapejs }}",
+        normal: "{{ tr_normal|escapejs }}",
+        warning: "{{ tr_warning|escapejs }}",
+        critical: "{{ tr_critical|escapejs }}",
+        fish: "{{ tr_fish|escapejs }}",
+        allClear: "{{ tr_all_clear|escapejs }}",
+        failedToLoad: "{{ tr_failed|escapejs }}"
+    };
+
+    const farmMarkersJson = `{{ markers_json|safe }}`;
+    const farmMarkers = JSON.parse(farmMarkersJson);
+    let map = null;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Initialize Map (Voyager map skin for clean modern UI)
+        map = L.map('global-map').setView([33.5731, -7.5898], 6); 
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap © CARTO'
+        }).addTo(map);
+
+        if (farmMarkers.length > 0) {
+            const bounds = L.latLngBounds();
+            
+            farmMarkers.forEach(farm => {
+                let colorClass = 'normal';
+                if (farm.status === 'critical') colorClass = 'critical';
+                else if (farm.status === 'warning') colorClass = 'warning';
+
+                const iconHtml = `<div class="marker-pin ${colorClass}"></div><i class="bi bi-modem text-white position-absolute" style="top:50%;left:50%;transform:translate(-50%, -75%);font-size:12px;"></i>`;
+                
+                const customIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: iconHtml,
+                    iconSize: [30, 42],
+                    iconAnchor: [15, 42]
+                });
+
+                const marker = L.marker([farm.lat, farm.lon], {icon: customIcon}).addTo(map);
+                marker.bindTooltip(`<b>${farm.name}</b>`, {className: 'fw-bold shadow-sm border-0 px-2 py-1'});
+                
+                marker.on('click', () => loadFarmContext(farm.id));
+
+                bounds.extend([farm.lat, farm.lon]);
+            });
+
+            if (farmMarkers.length === 1) {
+                map.setView([farmMarkers[0].lat, farmMarkers[0].lon], 12);
+            } else {
+                map.fitBounds(bounds, {padding: [50, 50]});
+            }
+        }
+    });
+
+    function resetPanel() {
+        document.getElementById('panel-farm-details').classList.add('d-none');
+        document.getElementById('panel-overview').classList.remove('d-none');
+    }
+
+    async function loadFarmContext(farmId) {
+        document.getElementById('panel-overview').classList.add('d-none');
+        const detailsPanel = document.getElementById('panel-farm-details');
+        const contentDiv = document.getElementById('panel-content');
+        const loaderDiv = document.getElementById('panel-loader');
+        
+        detailsPanel.classList.remove('d-none');
+        contentDiv.classList.add('d-none');
+        loaderDiv.classList.remove('d-none');
+        loaderDiv.classList.add('d-flex');
+
+        try {
+            const response = await fetch(`/api/map-context/${farmId}/`);
+            const data = await response.json();
+            
+            document.getElementById('ctx-farm-name').textContent = data.farm_name;
+            document.getElementById('ctx-manage-btn').href = data.farm_url;
+
+            const weatherBox = document.getElementById('ctx-weather-box');
+            const weatherData = document.getElementById('ctx-weather-data');
+            const weatherErr = document.getElementById('ctx-weather-error');
+
+            if (data.weather.error) {
+                weatherData.classList.add('d-none');
+                weatherErr.classList.remove('d-none');
+                document.getElementById('ctx-weather-msg').textContent = data.weather.message;
+                
+                document.getElementById('ctx-w-location').innerHTML = `<i class="bi bi-geo-alt-fill text-muted"></i> ${i18n.unknown}`;
+                document.getElementById('ctx-forecast-section').classList.add('d-none');
+                document.getElementById('ctx-wind-section').classList.add('d-none');
+            } else {
+                weatherErr.classList.add('d-none');
+                weatherData.classList.remove('d-none');
+                
+                document.getElementById('ctx-w-location').innerHTML = `<i class="bi bi-geo-alt-fill text-primary"></i> ${data.weather.location_name}, ${data.weather.country}`;
+                document.getElementById('ctx-w-temp').textContent = `${data.weather.temp}°C`;
+                document.getElementById('ctx-w-desc').textContent = data.weather.description;
+                document.getElementById('ctx-w-hum').textContent = data.weather.humidity;
+                if(data.weather.icon) document.getElementById('ctx-w-icon').src = data.weather.icon;
+
+                // Sync Forecast row
+                document.getElementById('ctx-forecast-section').classList.remove('d-none');
+                const forecastRow = document.getElementById('ctx-forecast-cards');
+                forecastRow.innerHTML = '';
+                if(data.weather.forecast) {
+                    data.weather.forecast.forEach(f => {
+                        forecastRow.innerHTML += `
+                            <div class="col-3">
+                                <div class="card border border-light shadow-sm bg-body text-center p-2 h-100 rounded-3">
+                                    <span class="small fw-bold text-muted" dir="ltr">${f.time}</span>
+                                    <img src="${f.icon}" alt="icon" class="mx-auto" style="width: 38px; height: 38px; object-fit: contain;">
+                                    <span class="fw-bold fs-6" dir="ltr">${f.temp}°</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Sync Wind Card
+                document.getElementById('ctx-wind-section').classList.remove('d-none');
+                document.getElementById('ctx-wind-speed').textContent = `${data.weather.wind_kph} ${i18n.kmh}`;
+                document.getElementById('ctx-wind-dir').textContent = `${data.weather.wind_dir}`;
+                document.getElementById('ctx-wind-gust').textContent = `${i18n.gusts} ${data.weather.gust_kph} ${i18n.kmh}`;
+            }
+
+            const pondsList = document.getElementById('ctx-ponds-list');
+            document.getElementById('ctx-ponds-count').textContent = data.ponds.length;
+            pondsList.innerHTML = '';
+            
+            if (data.ponds.length === 0) {
+                pondsList.innerHTML = `<div class="text-muted small text-center py-3 bg-body rounded border border-light">${i18n.noPonds}</div>`;
+            } else {
+                data.ponds.forEach(p => {
+                    let badge = `<span class="badge bg-success">${i18n.normal}</span>`;
+                    if(p.status === 'warning') badge = `<span class="badge bg-warning text-dark">${i18n.warning}</span>`;
+                    else if(p.status === 'critical') badge = `<span class="badge bg-danger">${i18n.critical}</span>`;
+                    
+                    pondsList.innerHTML += `
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-bottom-0 border-top bg-white px-3 py-2">
+                            <span class="fw-medium text-dark flex-grow-1">${p.name}</span>
+                            <span class="small text-muted mx-3 d-none d-xl-inline"><i class="bi bi-droplet"></i> ${p.fish_count} ${i18n.fish}</span>
+                            ${badge}
+                        </div>
+                    `;
+                });
+            }
+
+            const alertsList = document.getElementById('ctx-alerts-list');
+            alertsList.innerHTML = '';
+            
+            if (data.alerts.length === 0) {
+                alertsList.innerHTML = `<div class="p-3 bg-success-soft text-success rounded shadow-sm small fw-medium d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill"></i> ${i18n.allClear}</div>`;
+            } else {
+                data.alerts.forEach(a => {
+                    let borderClass = 'border-info';
+                    let textClass = 'text-info';
+                    let bgClass = 'bg-body';
+                    
+                    if(a.severity === 'critical') { borderClass = 'border-danger'; textClass = 'text-danger'; bgClass = 'bg-danger-soft';}
+                    else if(a.severity === 'warning') { borderClass = 'border-warning'; textClass = 'text-warning'; bgClass = 'bg-warning-soft';}
+                    
+                    alertsList.innerHTML += `
+                        <div class="card border-0 border-start border-4 ${borderClass} mb-2 ${bgClass} shadow-sm">
+                            <div class="card-body p-2 px-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="small fw-bold ${textClass}">${a.pond}</span>
+                                    <span class="text-muted" style="font-size:0.65rem;" dir="ltr">${a.time_ago}</span>
+                                </div>
+                                <p class="mb-0 small text-dark">${a.title}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            loaderDiv.classList.add('d-none');
+            loaderDiv.classList.remove('d-flex');
+            contentDiv.classList.remove('d-none');
+
+        } catch (error) {
+            console.error("Error fetching map context:", error);
+            loaderDiv.innerHTML = `<div class="p-4 text-danger text-center"><i class="bi bi-exclamation-triangle display-4"></i><p class="mt-2 text-muted">${i18n.failedToLoad}</p></div>`;
+        }
+    }
+</script>
+{% endblock %}

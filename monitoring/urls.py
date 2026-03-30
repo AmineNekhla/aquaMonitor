@@ -11,6 +11,10 @@ urlpatterns = [
     # Dashboard
     path('',                    views.dashboard,    name='dashboard'),
 
+    # Map View
+    path('map/',                views.global_map,   name='global_map'),
+    path('api/map-context/<int:farm_id>/', views.map_farm_context, name='map_farm_context'),
+
     # Farms
     path('farms/',              views.farms_list,   name='farms_list'),
     path('farms/create/',       views.create_farm,  name='create_farm'),

@@ -21,4 +21,5 @@ urlpatterns = [
 
     # All monitoring app URLs (dashboard, farms, ponds, alerts, profile)
     path('', include('monitoring.urls')),
+    path('api/v1/', include('monitoring.api.urls')),
 ]

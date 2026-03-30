@@ -51,6 +51,8 @@ class Farm(models.Model):
     owner    = models.ForeignKey(User, on_delete=models.CASCADE, related_name='farms')
     name     = models.CharField(max_length=200)
     location = models.CharField(max_length=300, blank=True, default='')
+    latitude = models.FloatField(null=True, blank=True, help_text="GPS latitude (e.g., 33.5731)")
+    longitude = models.FloatField(null=True, blank=True, help_text="GPS longitude (e.g., -7.5898)")
     status   = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -261,3 +263,47 @@ class Forecast(models.Model):
 
     def __str__(self):
         return f"Forecast {self.pond.name} +{self.hour_offset}h → {self.status}"
+
+# ─── ESP32 Device & Command Models ────────────────────────────────────────────
+class ESPDevice(models.Model):
+    """An ESP32 device registry linking to a farm and holding an API key."""
+    STATUS_CHOICES = [('active', 'Active'), ('offline', 'Offline'), ('maintenance', 'Maintenance')]
+
+    farm = models.ForeignKey('Farm', on_delete=models.CASCADE, related_name='devices')
+    name = models.CharField(max_length=200)
+    mac_address = models.CharField(max_length=50, unique=True, help_text="e.g. 00:1B:44:11:3A:B7")
+    api_key = models.CharField(max_length=64, unique=True, editable=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='offline')
+    last_heartbeat = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.api_key:
+            import secrets
+            self.api_key = secrets.token_hex(32)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} [{self.mac_address}]"
+
+class DeviceCommand(models.Model):
+    """Commands queued for an ESP32 to fetch."""
+    STATUS_CHOICES = [('pending', 'Pending'), ('delivered', 'Delivered'), ('acknowledged', 'Acknowledged'), ('failed', 'Failed')]
+
+    device = models.ForeignKey(ESPDevice, on_delete=models.CASCADE, related_name='commands')
+    command_name = models.CharField(max_length=100)  # e.g. "RELAY_ON"
+    payload = models.JSONField(default=dict, blank=True)
+    message_id = models.CharField(max_length=64, unique=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.message_id:
+            import uuid
+            self.message_id = str(uuid.uuid4())
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.command_name} -> {self.device.name} [{self.status}]"

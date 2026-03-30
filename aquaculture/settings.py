@@ -31,6 +31,7 @@ INSTALLED_APPS = [
 
     # Our application
     'monitoring',
+    'rest_framework',
 ]
 
 # ─── Middleware ───────────────────────────────────────────────────────────────
