@@ -26,7 +26,8 @@ services:
       test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8001/health\")'"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
+      start_period: 40s #H: more time given before health check (for efficient web app startup due to dependency)
 
   web:
     build: .
