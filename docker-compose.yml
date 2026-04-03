@@ -46,6 +46,56 @@ services:
         condition: service_healthy
       ai:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+  
+  celery_worker:
+    build: .
+    container_name: aqua_celery_worker
+    command: celery -A aquaculture worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - AI_SERVICE_URL=http://ai:8001
+    depends_on:
+      - db
+      - redis
+      - web
+    restart: always
+
+  celery_beat:
+    build: .
+    container_name: aqua_celery_beat
+    command: celery -A aquaculture beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - AI_SERVICE_URL=http://ai:8001
+    depends_on:
+      - db
+      - redis
+      - web
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: aqua_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: always
 
 volumes:
   # Persistent volume for the PostgreSQL database
