@@ -10,6 +10,7 @@ class DeviceCommandSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeviceCommand
         fields = ['message_id', 'command_name', 'payload', 'status', 'created_at', 'expires_at']
+        read_only_fields = ['message_id']
 
 class SensorReadingPayloadSerializer(serializers.Serializer):
     device_code = serializers.CharField(max_length=100)

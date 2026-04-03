@@ -42,6 +42,8 @@
           <tr>
             <th class="ps-4 py-3 fw-semibold border-0">Farm Name</th>
             <th class="py-3 fw-semibold border-0">Location</th>
+            <th class="py-3 fw-semibold border-0">Latitude</th>
+            <th class="py-3 fw-semibold border-0">Longitude</th>
             <th class="py-3 fw-semibold border-0">Status</th>
             <th class="py-3 fw-semibold border-0 text-center">Ponds</th>
             <th class="py-3 fw-semibold border-0">Registered</th>
@@ -69,6 +71,14 @@
 
             <td class="py-4 text-secondary fw-medium">
               <i class="bi bi-geo text-muted me-1"></i>{{ farm.location|default:"Unspecified" }}
+            </td>
+
+            <td class="py-4 text-muted" style="font-size: 0.85rem;">
+              {{ farm.latitude|default:"—" }}
+            </td>
+
+            <td class="py-4 text-muted" style="font-size: 0.85rem;">
+              {{ farm.longitude|default:"—" }}
             </td>
 
             <td class="py-4">

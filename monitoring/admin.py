@@ -111,4 +111,4 @@ class DeviceCommandAdmin(admin.ModelAdmin):
     list_display  = ('device', 'command_name', 'status', 'message_id', 'created_at', 'expires_at')
     list_filter   = ('status', 'command_name')
     search_fields = ('device__name', 'message_id')
-    readonly_fields = ('created_at', 'acknowledged_at')
+    readonly_fields = ('message_id', 'created_at', 'acknowledged_at')
