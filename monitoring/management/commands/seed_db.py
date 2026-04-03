@@ -274,6 +274,8 @@ class Command(BaseCommand):
             defaults={
                 "owner":    manager1,
                 "location": "Imiouadar, Souss-Massa, Maroc",
+                "latitude": 30.3845,   # Imiouadar area
+                "longitude": -9.5632,
                 "status":   "active",
             }
         )
@@ -283,6 +285,8 @@ class Command(BaseCommand):
             defaults={
                 "owner":    manager2,
                 "location": "Agadir, Souss-Massa, Maroc",
+                "latitude": 30.4278,   # Agadir 
+                "longitude": -9.5981,
                 "status":   "active",
             }
         )
@@ -292,6 +296,8 @@ class Command(BaseCommand):
             defaults={
                 "owner":    manager3,
                 "location": "Agadir, Souss-Massa, Maroc",
+                "latitude": 30.4212,   # Central Agadir
+                "longitude": -9.5823,
                 "status":   "active",
             }
         )
