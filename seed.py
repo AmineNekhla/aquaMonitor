@@ -26,8 +26,8 @@ def seed(username='admin', password='adminpass'):
     print("Cleaned up old farms.")
 
     # Create Farms
-    farm1 = Farm.objects.create(owner=user, name="Blue Waters Facility", location="Coastal Zone A")
-    farm2 = Farm.objects.create(owner=user, name="Inland Breeder Hub", location="Inland Region B")
+    farm1 = Farm.objects.create(owner=user, name="Blue Waters Facility", location="Coastal Zone A", latitude=33.5731, longitude=-7.5898)
+    farm2 = Farm.objects.create(owner=user, name="Inland Breeder Hub", location="Inland Region B", latitude=30.4278, longitude=-9.5925)
 
     # Create Ponds
     pond1 = Pond.objects.create(

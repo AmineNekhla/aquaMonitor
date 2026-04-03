@@ -29,6 +29,15 @@
 
           <dt class="col-sm-4">Location</dt>
           <dd class="col-sm-8">{{ farm.location|default:"—" }}</dd>
+
+          <dt class="col-sm-4">GPS (Lat/Lon)</dt>
+          <dd class="col-sm-8">
+            {% if farm.latitude and farm.longitude %}
+              {{ farm.latitude }}, {{ farm.longitude }}
+            {% else %}
+              —
+            {% endif %}
+          </dd>
         </dl>
       </div>
       <div class="col-md-6">

@@ -15,6 +15,7 @@ Entities:
 
 from django.db import models
 from django.contrib.auth.models import User
+import uuid
 
 
 # ─── Profile ──────────────────────────────────────────────────────────────────
@@ -293,17 +294,11 @@ class DeviceCommand(models.Model):
     device = models.ForeignKey(ESPDevice, on_delete=models.CASCADE, related_name='commands')
     command_name = models.CharField(max_length=100)  # e.g. "RELAY_ON"
     payload = models.JSONField(default=dict, blank=True)
-    message_id = models.CharField(max_length=64, unique=True)
+    message_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     acknowledged_at = models.DateTimeField(null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        if not self.message_id:
-            import uuid
-            self.message_id = str(uuid.uuid4())
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.command_name} -> {self.device.name} [{self.status}]"
