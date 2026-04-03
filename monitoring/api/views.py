@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from django.utils import timezone
 from .serializers import *
 from .auth import APIKeyAuthentication
-from monitoring.models import ESPDevice, DeviceCommand, Sensor, SensorReading, Alert
+from monitoring.models import ESPDevice, DeviceCommand, Sensor, SensorReading, Alert, Forecast, Pond, Farm
+from django.shortcuts import get_object_or_404
 
 class DeviceRegisterView(views.APIView):
     """
@@ -134,3 +135,57 @@ class SensorHistoryView(views.APIView):
         readings = SensorReading.objects.all()[:100] # Limiting for demo
         serializer = SensorReadingHistorySerializer(readings, many=True)
         return Response(serializer.data)
+
+
+#H: forecast view
+class ForecastListView(views.APIView):
+    """
+    GET /api/forecasts/
+    
+    Fetch all forecasts for current user's ponds.
+    Returns only future forecasts (target_time >= now).
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user_farms = Farm.objects.filter(owner=request.user)
+        user_ponds = Pond.objects.filter(farm__in=user_farms)
+        
+        # Get forecasts from now onwards
+        now = timezone.now()
+        forecasts = Forecast.objects.filter(
+            pond__in=user_ponds,
+            target_time__gte=now
+        ).order_by('target_time').select_related('pond', 'pond__farm')[:30]  # Limit to 30
+        
+        serializer = ForecastSerializer(forecasts, many=True)
+        return Response({
+            'count': len(forecasts),
+            'data': serializer.data
+        })
+
+
+class PondForecastView(views.APIView):
+    """
+    GET /api/ponds/<pond_id>/forecasts/
+    
+    Fetch 6-hour forecast for a specific pond.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pond_id):
+        pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
+        
+        now = timezone.now()
+        forecasts = Forecast.objects.filter(
+            pond=pond,
+            target_time__gte=now
+        ).order_by('target_time')[:6]  # Next 6 hours
+        
+        serializer = ForecastSerializer(forecasts, many=True)
+        return Response({
+            'pond_id': pond.id,
+            'pond_name': pond.name,
+            'count': len(forecasts),
+            'data': serializer.data
+        })

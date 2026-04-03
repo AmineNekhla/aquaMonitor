@@ -14,4 +14,8 @@ urlpatterns = [
     
     # Alert Routes
     path('alerts/', views.AlertsView.as_view(), name='api_alerts'),
+    
+    # Forecast Routes
+    path('forecasts/', views.ForecastListView.as_view(), name='forecast-list'),
+    path('ponds/<int:pond_id>/forecasts/', views.PondForecastView.as_view(), name='pond-forecasts'),
 ]

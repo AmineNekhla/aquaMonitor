@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from monitoring.models import ESPDevice, DeviceCommand, SensorReading, Alert
+from monitoring.models import ESPDevice, DeviceCommand, SensorReading, Alert, Forecast
+
 
 class DeviceRegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,3 +31,30 @@ class SensorReadingHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorReading
         fields = ['id', 'sensor_type', 'device_code', 'value', 'recorded_at']
+
+
+
+class ForecastSerializer(serializers.ModelSerializer):
+    """Serializer for Forecast objects."""
+    pond_name = serializers.CharField(source='pond.name', read_only=True)
+    farm_name = serializers.CharField(source='pond.farm.name', read_only=True)
+    
+    class Meta:
+        model = Forecast
+        fields = [
+            'id',
+            'pond',
+            'pond_name',
+            'farm_name',
+            'created_at',
+            'target_time',
+            'hour_offset',
+            'temp',
+            'do',
+            'ph',
+            'ammonia',
+            'status',
+            'issues',
+            'actions',
+        ]
+        read_only_fields = ['id', 'created_at']
