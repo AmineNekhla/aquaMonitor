@@ -21,6 +21,28 @@ from .models import Farm, Pond, Sensor, SensorReading, Camera, AIDetection, Aler
 from .forms import ProfileForm, PondForm, FarmForm
 
 
+# ─── Access Helpers ──────────────────────────────────────────────────────────
+def is_admin(user):
+    """Checks if the user has the 'admin' role or is a superuser."""
+    if user.is_superuser:
+        return True
+    if hasattr(user, 'profile') and user.profile.role == 'admin':
+        return True
+    return False
+
+def get_user_farms(user):
+    """Returns all farms if the user is an admin, else only owned farms."""
+    if is_admin(user):
+        return Farm.objects.all()
+    return Farm.objects.filter(owner=user)
+
+def get_user_ponds(user):
+    """Returns all ponds if the user is an admin, else only owned ponds."""
+    if is_admin(user):
+        return Pond.objects.all()
+    return Pond.objects.filter(farm__owner=user)
+
+
 # ─── Dashboard ───────────────────────────────────────────────────────────────
 @login_required
 def dashboard(request):
@@ -28,8 +50,8 @@ def dashboard(request):
     Executive Home page.
     Shows the 4 main KPIs: Total Fish Stock, Active Alerts, Water Quality Index, Equipment Status.
     """
-    user_farms = Farm.objects.filter(owner=request.user)
-    user_ponds = Pond.objects.filter(farm__in=user_farms)
+    user_farms = get_user_farms(request.user)
+    user_ponds = get_user_ponds(request.user)
     user_sensors = Sensor.objects.filter(pond__in=user_ponds)
     user_cameras = Camera.objects.filter(pond__in=user_ponds)
 
@@ -134,7 +156,7 @@ def dashboard(request):
 @login_required
 def farms_list(request):
     """List all farms owned by the current user."""
-    farms = Farm.objects.filter(owner=request.user)
+    farms = get_user_farms(request.user)
     return render(request, 'monitoring/farms.html', {'farms': farms})
 
 
@@ -165,9 +187,13 @@ def farm_detail(request, farm_id):
     """
     Detail page for a single farm.
     Shows the farm's info and all ponds inside it.
-    Only the owner can view this farm.
+    Only the owner or an admin can view this farm.
     """
-    farm  = get_object_or_404(Farm, id=farm_id, owner=request.user)
+    if is_admin(request.user):
+        farm = get_object_or_404(Farm, id=farm_id)
+    else:
+        farm = get_object_or_404(Farm, id=farm_id, owner=request.user)
+    
     ponds = Pond.objects.filter(farm=farm)
     
     return render(request, 'monitoring/farm_detail.html', {
@@ -179,9 +205,12 @@ def farm_detail(request, farm_id):
 @login_required
 def pond_create(request, farm_id):
     """
-    Create a new pond inside a specific farm.
+    Create a new pond inside a specific farm (if owned or admin).
     """
-    farm = get_object_or_404(Farm, id=farm_id, owner=request.user)
+    if is_admin(request.user):
+        farm = get_object_or_404(Farm, id=farm_id)
+    else:
+        farm = get_object_or_404(Farm, id=farm_id, owner=request.user)
     
     if request.method == 'POST':
         form = PondForm(request.POST)
@@ -204,7 +233,7 @@ def ponds_list(request):
     List all ponds for the current user's farms as a dashboard grid.
     Includes latest metrics and trend data for sparklines.
     """
-    user_farms = Farm.objects.filter(owner=request.user)
+    user_farms = get_user_farms(request.user)
     ponds = Pond.objects.filter(farm__in=user_farms).select_related('farm').order_by('farm__name', 'name')
     
     pond_data_list = []
@@ -251,8 +280,11 @@ def pond_detail(request, pond_id):
     Detail page for a single pond.
     Shows sensors and their latest readings, cameras, AI detections, and alerts.
     """
-    # Restrict access: only the owner of the farm that contains this pond
-    pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
+    # Restrict access: only the owner or an admin
+    if is_admin(request.user):
+        pond = get_object_or_404(Pond, id=pond_id)
+    else:
+        pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
 
     sensors     = Sensor.objects.filter(pond=pond)
     cameras     = Camera.objects.filter(pond=pond)
@@ -324,7 +356,10 @@ def pond_live_readings(request, pond_id):
     JSON endpoint for AJAX polling.
     Returns the latest reading for Key Sensors.
     """
-    pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
+    if is_admin(request.user):
+        pond = get_object_or_404(Pond, id=pond_id)
+    else:
+        pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
     sensors = Sensor.objects.filter(pond=pond)
     
     data = {}
@@ -348,7 +383,10 @@ def pond_live_readings(request, pond_id):
 def pond_action_aerator(request, pond_id):
     """POST action: Activate Emergency Aerator and log an alert."""
     if request.method == 'POST':
-        pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
+        if is_admin(request.user):
+            pond = get_object_or_404(Pond, id=pond_id)
+        else:
+            pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
         # Create an audit/system alert showing the emergency action was taken
         Alert.objects.create(
             pond=pond,
@@ -366,7 +404,10 @@ def pond_action_aerator(request, pond_id):
 def pond_action_calibrate(request, pond_id):
     """POST action: Simulate sensor calibration by setting all offline/faulty to online."""
     if request.method == 'POST':
-        pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
+        if is_admin(request.user):
+            pond = get_object_or_404(Pond, id=pond_id)
+        else:
+            pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
         # Reset any faulty or offline sensors back to online
         updated = Sensor.objects.filter(pond=pond).exclude(status='online').update(status='online')
         
@@ -385,7 +426,10 @@ def pond_action_calibrate(request, pond_id):
 @login_required
 def pond_action_report(request, pond_id):
     """GET action: Download 24-hour reading history as CSV."""
-    pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
+    if is_admin(request.user):
+        pond = get_object_or_404(Pond, id=pond_id)
+    else:
+        pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
     
     # Setup CSV Response
     response = HttpResponse(
@@ -422,7 +466,7 @@ def pond_action_report(request, pond_id):
 @login_required
 def alerts_list(request):
     """List all alerts across all ponds of the current user, newest first."""
-    user_farms = Farm.objects.filter(owner=request.user)
+    user_farms = get_user_farms(request.user)
     user_ponds = Pond.objects.filter(farm__in=user_farms)
     alerts     = Alert.objects.filter(pond__in=user_ponds).select_related('pond__farm').order_by('-created_at')
     return render(request, 'monitoring/alerts.html', {'alerts': alerts})
@@ -431,8 +475,11 @@ def alerts_list(request):
 @login_required
 def mark_alert_read(request, alert_id):
     """Marks a single alert as acknowledged (read)."""
-    # Use pond__farm__owner to ensure only the owner can modify this
-    alert = get_object_or_404(Alert, id=alert_id, pond__farm__owner=request.user)
+    # Use pond__farm__owner to ensure only the owner or an admin can modify this
+    if is_admin(request.user):
+        alert = get_object_or_404(Alert, id=alert_id)
+    else:
+        alert = get_object_or_404(Alert, id=alert_id, pond__farm__owner=request.user)
     if alert.status == 'open':
         alert.status = 'acknowledged'
         alert.save()
@@ -444,7 +491,7 @@ def mark_alert_read(request, alert_id):
 @login_required
 def mark_all_alerts_read(request):
     """Marks all 'open' alerts for this user's ponds as acknowledged (read)."""
-    user_farms = Farm.objects.filter(owner=request.user)
+    user_farms = get_user_farms(request.user)
     user_ponds = Pond.objects.filter(farm__in=user_farms)
     # Bulk update all open alerts to acknowledged
     updated_count = Alert.objects.filter(pond__in=user_ponds, status='open').update(status='acknowledged')
@@ -488,7 +535,7 @@ def global_map(request):
     """
     Dedicated map interface showing all farms.
     """
-    user_farms = Farm.objects.filter(owner=request.user)
+    user_farms = get_user_farms(request.user)
     user_ponds = Pond.objects.filter(farm__in=user_farms)
     
     # Global Overview Metrics
@@ -539,7 +586,10 @@ def map_farm_context(request, farm_id):
     """
     AJAX Endpoint: Fetches live contextual details when a farm marker is clicked.
     """
-    farm = get_object_or_404(Farm, id=farm_id, owner=request.user)
+    if is_admin(request.user):
+        farm = get_object_or_404(Farm, id=farm_id)
+    else:
+        farm = get_object_or_404(Farm, id=farm_id, owner=request.user)
     
     # Weather
     weather_data = {"error": True, "message": "No coordinates assigned to this farm"}
