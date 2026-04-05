@@ -1,0 +1,478 @@
+{% extends 'monitoring/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}AI Forecast — {{ pond.name }}{% endblock %}
+{% block page_title %}AI Forecast{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:0.8rem; font-family:'Inter',sans-serif;">
+    <li class="breadcrumb-item"><a href="{% url 'farms_list' %}" style="color:#45B1E8; text-decoration:none;">Farms</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'farm_detail' pond.farm.id %}" style="color:#45B1E8; text-decoration:none;">{{ pond.farm.name }}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'pond_detail' pond.id %}" style="color:#45B1E8; text-decoration:none;">{{ pond.name }}</a></li>
+    <li class="breadcrumb-item active" style="color:#64748b;">AI Forecast</li>
+  </ol>
+</nav>
+
+<!-- ══ HEADER ════════════════════════════════════════════════════ -->
+<div class="forecast-header mb-4">
+  <div class="forecast-header-content">
+    <div class="forecast-icon-wrap">
+      <i class="bi bi-graph-up-arrow"></i>
+    </div>
+    <div>
+      <h2 class="forecast-title">Water Quality Forecast</h2>
+      <p class="forecast-subtitle">
+        <i class="bi bi-water me-1"></i>{{ pond.name }}
+        <span class="forecast-divider">·</span>
+        <i class="bi bi-geo-alt me-1"></i>{{ pond.farm.name }}
+        <span class="forecast-divider">·</span>
+        <i class="bi bi-clock me-1"></i>Next 6 Hours
+      </p>
+    </div>
+  </div>
+  <div class="forecast-header-actions">
+    {% if source == 'live' %}
+      <span class="source-badge source-live"><span class="pulse-dot"></span>Live AI</span>
+    {% else %}
+      <span class="source-badge source-db"><i class="bi bi-database me-1"></i>Stored</span>
+    {% endif %}
+    <a href="{% url 'pond_detail' pond.id %}" class="btn-back">
+      <i class="bi bi-arrow-left me-1"></i>Back to Pond
+    </a>
+  </div>
+</div>
+
+{% if not forecast %}
+<!-- Empty State -->
+<div class="forecast-empty">
+  <div class="forecast-empty-icon">
+    <i class="bi bi-cloud-slash"></i>
+  </div>
+  <h3>No Forecast Available</h3>
+  <p>The AI service is offline and there are no stored forecasts for this pond yet.<br>
+     Run a seed or inference job to generate forecast data.</p>
+  <a href="{% url 'pond_detail' pond.id %}" class="forecast-btn-primary">
+    <i class="bi bi-arrow-left me-2"></i>Return to Pond
+  </a>
+</div>
+{% else %}
+
+<!-- ══ KPI SUMMARY STRIP ════════════════════════════════════════ -->
+<div class="kpi-strip mb-4">
+  {% for item in forecast %}
+  <div class="kpi-card {% if item.status == 'Good' %}kpi-good{% elif item.status == 'Warning' %}kpi-warning{% else %}kpi-risk{% endif %}">
+    <div class="kpi-hour">H+{{ item.hour }}</div>
+    <div class="kpi-status-badge {% if item.status == 'Good' %}badge-good{% elif item.status == 'Warning' %}badge-warn{% else %}badge-risk{% endif %}">
+      {% if item.status == 'Good' %}<i class="bi bi-check-circle-fill me-1"></i>{% elif item.status == 'Warning' %}<i class="bi bi-exclamation-triangle-fill me-1"></i>{% else %}<i class="bi bi-x-octagon-fill me-1"></i>{% endif %}
+      {{ item.status }}
+    </div>
+    <div class="kpi-params">
+      <span title="Temperature"><i class="bi bi-thermometer-half text-orange"></i> {{ item.temp }}°C</span>
+      <span title="Dissolved Oxygen"><i class="bi bi-moisture text-blue"></i> {{ item.do }} mg/L</span>
+      <span title="pH"><i class="bi bi-droplet-half text-purple"></i> {{ item.ph }}</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ══ MAIN GRID ════════════════════════════════════════════════ -->
+<div class="row g-4 mb-4">
+
+  <!-- Chart -->
+  <div class="col-lg-8">
+    <div class="card border-0 h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-activity me-2" style="color:#45B1E8;"></i>Predicted Parameter Trends</span>
+        <span class="badge-status badge-info" style="font-size:0.68rem;">Next 6 Hours</span>
+      </div>
+      <div class="card-body" style="padding:1.25rem;">
+        <canvas id="forecastChart" style="width:100%; max-height:280px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommended Actions -->
+  <div class="col-lg-4">
+    <div class="card border-0 h-100" style="background:linear-gradient(145deg,#1a2e52 0%,#0f172a 100%);">
+      <div class="card-body p-4 d-flex flex-column" style="color:#fff; gap:0.75rem;">
+        <div style="font-size:0.85rem; font-weight:700; text-align:center; color:#fff; margin-bottom:0.5rem;">
+          <i class="bi bi-lightbulb-fill me-2" style="color:#fbbf24;"></i>Recommended Actions
+        </div>
+        {% if all_actions %}
+        <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem;">
+          {% for action in all_actions %}
+          <li style="display:flex; align-items:flex-start; gap:0.65rem; background:rgba(255,255,255,0.07); border-radius:10px; padding:0.65rem 0.9rem; font-size:0.82rem; line-height:1.5; color:#e2e8f0;">
+            <i class="bi bi-arrow-right-circle-fill" style="color:#45B1E8; font-size:1rem; margin-top:0.1rem; flex-shrink:0;"></i>
+            {{ action }}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div style="text-align:center; color:rgba(255,255,255,0.5); font-size:0.82rem; margin:auto;">
+          <i class="bi bi-check2-all" style="font-size:2rem; display:block; margin-bottom:0.5rem; color:#10b981;"></i>
+          No actions required — all parameters are within safe range.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ DETAILED FORECAST TABLE ══ -->
+<div class="card border-0 mb-4">
+  <div class="card-header">
+    <i class="bi bi-table me-2" style="color:#45B1E8;"></i>Hour-by-Hour Breakdown
+  </div>
+  <div class="table-responsive">
+    <table class="forecast-table">
+      <thead>
+        <tr>
+          <th>Hour</th>
+          <th><i class="bi bi-thermometer-half text-orange me-1"></i>Temp (°C)</th>
+          <th><i class="bi bi-moisture text-blue me-1"></i>DO (mg/L)</th>
+          <th><i class="bi bi-droplet-half text-purple me-1"></i>pH</th>
+          <th><i class="bi bi-flask text-teal me-1"></i>Ammonia (mg/L)</th>
+          <th>Status</th>
+          <th>Issues</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in forecast %}
+        <tr class="{% if item.status == 'Risk' %}row-risk{% elif item.status == 'Warning' %}row-warning{% else %}row-good{% endif %}">
+          <td>
+            <div class="hour-chip">
+              <i class="bi bi-clock me-1"></i>Hour {{ item.hour }}
+            </div>
+          </td>
+          <td class="fw-600">{{ item.temp }}</td>
+          <td class="fw-600">{{ item.do }}</td>
+          <td class="fw-600">{{ item.ph }}</td>
+          <td class="fw-600">{{ item.ammonia }}</td>
+          <td>
+            {% if item.status == 'Good' %}
+              <span class="table-badge badge-good"><i class="bi bi-check-circle-fill me-1"></i>Good</span>
+            {% elif item.status == 'Warning' %}
+              <span class="table-badge badge-warn"><i class="bi bi-exclamation-triangle-fill me-1"></i>Warning</span>
+            {% else %}
+              <span class="table-badge badge-risk"><i class="bi bi-x-octagon-fill me-1"></i>Risk</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if item.issues_list %}
+              <ul class="issue-list">
+                {% for issue in item.issues_list %}
+                  <li>{{ issue }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span style="color:#94a3b8; font-size:0.78rem;">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ FUTURE ALERTS SECTION ══ -->
+<div class="card border-0 mb-4">
+  <div class="card-header">
+    <i class="bi bi-exclamation-triangle-fill me-2" style="color:#f59e0b;"></i>Predicted Risk Events
+  </div>
+  <div class="card-body" style="padding:1.25rem;">
+    <div class="alerts-timeline" id="alerts-timeline">
+      {% for item in forecast %}
+        {% if item.issues_list %}
+        <div class="timeline-item {% if item.status == 'Risk' %}timeline-risk{% else %}timeline-warning{% endif %}">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <span class="timeline-hour">Hour {{ item.hour }}</span>
+              {% if item.status == 'Risk' %}
+                <span class="table-badge badge-risk" style="font-size:0.65rem;">Risk</span>
+              {% else %}
+                <span class="table-badge badge-warn" style="font-size:0.65rem;">Warning</span>
+              {% endif %}
+            </div>
+            <ul class="timeline-issues">
+              {% for issue in item.issues_list %}
+                <li>{{ issue }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- All-clear message — shown by JS if no timeline items exist -->
+    <div id="all-clear-msg" style="display:none; text-align:center; padding:2rem 1rem; color:#94a3b8;">
+      <i class="bi bi-shield-check" style="font-size:2.5rem; display:block; margin-bottom:0.75rem; color:#10b981;"></i>
+      <div style="font-size:0.9rem; font-weight:600; color:#10b981;">All Clear</div>
+      <div style="font-size:0.8rem;">No predicted risk events in the next 6 hours.</div>
+    </div>
+  </div>
+</div>
+
+{% endif %}{# end if forecast #}
+
+<!-- ══ STYLES ════════════════════════════════════════════════════ -->
+<style>
+/* Header */
+.forecast-header {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+  background: linear-gradient(135deg, #1a2e52 0%, #0f172a 100%);
+  border-radius: 16px; padding: 1.5rem 2rem; color: #fff;
+}
+.forecast-header-content { display:flex; align-items:center; gap:1.25rem; }
+.forecast-icon-wrap {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: rgba(69,177,232,0.2); display:flex; align-items:center;
+  justify-content:center; font-size:1.5rem; color:#45B1E8; flex-shrink:0;
+}
+.forecast-title { font-size:1.3rem; font-weight:800; margin:0 0 0.25rem; letter-spacing:-0.02em; }
+.forecast-subtitle { font-size:0.82rem; color:rgba(255,255,255,0.65); margin:0; }
+.forecast-divider { margin:0 6px; opacity:0.4; }
+.forecast-header-actions { display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; }
+.source-badge {
+  display:inline-flex; align-items:center; border-radius:20px;
+  padding:5px 14px; font-size:0.72rem; font-weight:700; letter-spacing:0.05em;
+}
+.source-live { background:rgba(16,185,129,0.2); color:#10b981; border:1px solid rgba(16,185,129,0.3); }
+.source-db   { background:rgba(100,116,139,0.2); color:#94a3b8; border:1px solid rgba(100,116,139,0.3); }
+.pulse-dot {
+  display:inline-block; width:7px; height:7px; border-radius:50%;
+  background:#10b981; margin-right:6px; animation:pulse-dot 1.4s infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.btn-back {
+  display:inline-flex; align-items:center; background:rgba(255,255,255,0.1);
+  color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:10px;
+  padding:8px 18px; font-size:0.82rem; font-weight:600; text-decoration:none;
+  transition:all 0.2s; backdrop-filter:blur(4px);
+}
+.btn-back:hover { background:rgba(255,255,255,0.18); color:#fff; }
+
+/* KPI strip */
+.kpi-strip { display:flex; gap:0.75rem; flex-wrap:wrap; overflow-x:auto; padding-bottom:4px; }
+.kpi-card {
+  flex:1; min-width:130px; border-radius:14px; padding:1rem 1rem 0.85rem;
+  display:flex; flex-direction:column; gap:0.5rem; border:1px solid transparent;
+  background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  transition:transform 0.18s;
+}
+.kpi-card:hover { transform:translateY(-2px); }
+.kpi-good    { border-color:rgba(16,185,129,0.25);  background:linear-gradient(145deg,#ecfdf5,#fff); }
+.kpi-warning { border-color:rgba(245,158,11,0.3);   background:linear-gradient(145deg,#fffbeb,#fff); }
+.kpi-risk    { border-color:rgba(239,68,68,0.3);    background:linear-gradient(145deg,#fef2f2,#fff); }
+.kpi-hour { font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; }
+.kpi-status-badge {
+  display:inline-flex; align-items:center; border-radius:20px;
+  padding:4px 10px; font-size:0.72rem; font-weight:700;
+}
+.badge-good { background:#dcfce7; color:#15803d; }
+.badge-warn { background:#fef3c7; color:#b45309; }
+.badge-risk { background:#fee2e2; color:#dc2626; }
+.kpi-params { display:flex; flex-direction:column; gap:3px; font-size:0.75rem; color:#475569; font-weight:500; }
+.kpi-params span { display:flex; align-items:center; gap:5px; }
+.text-orange { color:#f97316; }
+.text-blue   { color:#45B1E8; }
+.text-purple { color:#a855f7; }
+.text-teal   { color:#14b8a6; }
+
+/* Forecast Table */
+.forecast-table { width:100%; border-collapse:collapse; font-family:'Inter',sans-serif; font-size:0.83rem; }
+.forecast-table th {
+  padding:0.65rem 1rem; font-size:0.72rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.06em; color:#64748b; background:#f8fafc;
+  border-bottom:2px solid #e2e8f0; white-space:nowrap;
+}
+.forecast-table td { padding:0.75rem 1rem; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+.forecast-table tbody tr:hover { background:#f8fafc; }
+.row-risk    td { background:rgba(239,68,68,0.03); }
+.row-warning td { background:rgba(245,158,11,0.03); }
+.row-good    td { background:transparent; }
+.hour-chip {
+  display:inline-flex; align-items:center; background:#f1f5f9;
+  color:#1a2744; border-radius:8px; padding:4px 10px; font-size:0.78rem; font-weight:700;
+}
+.fw-600 { font-weight:600; color:#1a2744; }
+.table-badge {
+  display:inline-flex; align-items:center; border-radius:20px;
+  padding:4px 10px; font-size:0.72rem; font-weight:700; white-space:nowrap;
+}
+
+/* Issue lists */
+.issue-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:3px; }
+.issue-list li {
+  font-size:0.75rem; color:#64748b; display:flex; align-items:flex-start; gap:5px;
+}
+.issue-list li::before { content:"⚠"; color:#f59e0b; flex-shrink:0; }
+
+/* Timeline */
+.alerts-timeline { display:flex; flex-direction:column; gap:0; }
+.timeline-item {
+  display:flex; gap:1rem; padding:1rem 1rem 1rem 0.5rem;
+  border-left:2px solid #e2e8f0; margin-left:1rem;
+  position:relative;
+}
+.timeline-risk    { border-left-color:#ef4444; }
+.timeline-warning { border-left-color:#f59e0b; }
+.timeline-dot {
+  width:12px; height:12px; border-radius:50%; background:#e2e8f0;
+  position:absolute; left:-7px; top:1.2rem; flex-shrink:0;
+}
+.timeline-risk .timeline-dot    { background:#ef4444; }
+.timeline-warning .timeline-dot { background:#f59e0b; }
+.timeline-content { flex:1; }
+.timeline-header { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; }
+.timeline-hour { font-weight:700; font-size:0.82rem; color:#1a2744; }
+.timeline-issues { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; }
+.timeline-issues li { font-size:0.8rem; color:#64748b; }
+.timeline-issues li::before { content:"→ "; color:#45B1E8; font-weight:700; }
+
+/* Empty state */
+.forecast-empty {
+  text-align:center; padding:4rem 2rem; background:#fff; border-radius:16px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+}
+.forecast-empty-icon { font-size:3rem; color:#cbd5e1; margin-bottom:1rem; }
+.forecast-empty h3 { font-size:1.15rem; font-weight:700; color:#1a2744; margin-bottom:0.5rem; }
+.forecast-empty p { color:#64748b; font-size:0.88rem; margin-bottom:1.5rem; }
+.forecast-btn-primary {
+  display:inline-flex; align-items:center; background:#45B1E8; color:#fff;
+  border-radius:10px; padding:10px 20px; font-size:0.85rem; font-weight:600;
+  text-decoration:none; transition:all 0.2s;
+}
+.forecast-btn-primary:hover { background:#2f9fd4; color:#fff; }
+
+@media (max-width: 640px) {
+  .forecast-header { padding:1.2rem; }
+  .forecast-header-content { gap:0.8rem; }
+  .forecast-icon-wrap { width:40px; height:40px; font-size:1.15rem; border-radius:10px; }
+  .forecast-title { font-size:1.05rem; }
+  .kpi-card { min-width:min(120px, 45%); }
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  // ── Check if any items have issues for all-clear state
+  const forecastItems = {{ forecast|length }};
+  const hasIssues = document.querySelectorAll('.timeline-item').length > 0;
+  if (!hasIssues) {
+    const msgEl = document.getElementById('all-clear-msg');
+    if (msgEl) msgEl.style.display = 'block';
+  }
+
+  // ── Chart.js Forecast Trend ────────────────────────────────────
+  const ctx = document.getElementById('forecastChart');
+  if (!ctx) return;
+
+  const labels   = {{ chart_labels|safe }};
+  const tempData = {{ chart_temp|safe }};
+  const doData   = {{ chart_do|safe }};
+  const phData   = {{ chart_ph|safe }};
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Temperature (°C)',
+          data: tempData,
+          borderColor: '#f97316',
+          backgroundColor: 'rgba(249,115,22,0.08)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#f97316',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          yAxisID: 'yTemp',
+        },
+        {
+          label: 'Dissolved Oxygen (mg/L)',
+          data: doData,
+          borderColor: '#45B1E8',
+          backgroundColor: 'rgba(69,177,232,0.08)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#45B1E8',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          yAxisID: 'yDo',
+        },
+        {
+          label: 'pH',
+          data: phData,
+          borderColor: '#a855f7',
+          backgroundColor: 'rgba(168,85,247,0.06)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#a855f7',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          yAxisID: 'yPh',
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { boxWidth: 12, usePointStyle: true, font: { family: 'Inter', size: 11 } }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15,23,42,0.92)',
+          titleFont: { family: 'Inter', size: 12, weight: '700' },
+          bodyFont:  { family: 'Inter', size: 11 },
+          cornerRadius: 8, padding: 10,
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: 'Inter', size: 11 }, color: '#64748b' }
+        },
+        yTemp: {
+          type: 'linear', display: true, position: 'left',
+          title: { display: true, text: '°C', font: { family: 'Inter', size: 10 }, color: '#f97316' },
+          ticks: { font: { family: 'Inter', size: 10 }, color: '#f97316' },
+          grid: { color: 'rgba(0,0,0,0.04)' },
+        },
+        yDo: {
+          type: 'linear', display: false, position: 'right',
+          grid: { drawOnChartArea: false },
+        },
+        yPh: {
+          type: 'linear', display: false, position: 'right',
+          grid: { drawOnChartArea: false },
+        },
+      }
+    }
+  });
+});
+</script>
+{% endblock %}

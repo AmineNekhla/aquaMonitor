@@ -49,6 +49,8 @@
 
   <!-- Camera Panel -->
   <div class="col-lg-8">
+    {% if main_camera and main_camera.stream_url %}
+    <!-- Full camera card when live stream is configured -->
     <div class="card border-0" style="background:#0f172a; border-radius:14px; overflow:hidden; min-height:280px;">
 
       <!-- Camera header overlay -->
@@ -60,36 +62,44 @@
           {{ main_camera.name|default:"Live Feed" }}
         </span>
         <div style="display:flex; gap:0.5rem; align-items:center;">
-          {% if main_camera %}
-            <span style="background:rgba(59,130,246,0.85); color:#fff; border-radius:20px; padding:3px 10px; font-size:0.68rem; font-weight:700;">
-              <i class="bi bi-robot me-1"></i>{% trans "AI Active" %}
-            </span>
-            {% if main_camera.status == 'online' %}
-            <span style="background:rgba(239,68,68,0.85); color:#fff; border-radius:20px; padding:3px 10px; font-size:0.68rem; font-weight:700; display:flex; align-items:center; gap:4px;">
-              <span style="width:6px; height:6px; border-radius:50%; background:#fff; animation: pulse-dot 1.2s infinite;"></span>
-              LIVE
-            </span>
-            {% else %}
-            <span style="background:rgba(100,116,139,0.85); color:#fff; border-radius:20px; padding:3px 10px; font-size:0.68rem; font-weight:700;">{% trans "OFFLINE" %}</span>
-            {% endif %}
+          <span style="background:rgba(59,130,246,0.85); color:#fff; border-radius:20px; padding:3px 10px; font-size:0.68rem; font-weight:700;">
+            <i class="bi bi-robot me-1"></i>{% trans "AI Active" %}
+          </span>
+          {% if main_camera.status == 'online' %}
+          <span style="background:rgba(239,68,68,0.85); color:#fff; border-radius:20px; padding:3px 10px; font-size:0.68rem; font-weight:700; display:flex; align-items:center; gap:4px;">
+            <span style="width:6px; height:6px; border-radius:50%; background:#fff; animation: pulse-dot 1.2s infinite;"></span>
+            LIVE
+          </span>
+          {% else %}
+          <span style="background:rgba(100,116,139,0.85); color:#fff; border-radius:20px; padding:3px 10px; font-size:0.68rem; font-weight:700;">{% trans "OFFLINE" %}</span>
           {% endif %}
         </div>
       </div>
 
       <!-- Video area -->
       <div style="position:relative; min-height:280px; background:#000; display:flex; align-items:center; justify-content:center;">
-        {% if main_camera and main_camera.stream_url %}
-          <video id="live-video" style="width:100%; max-height:480px; object-fit:cover; display:block;" controls muted></video>
-        {% else %}
-          <div style="text-align:center; padding:3rem 2rem; color:#475569;">
-            <i class="bi bi-camera-video-off" style="font-size:2.5rem; display:block; margin-bottom:0.75rem; color:#334155;"></i>
-            <div style="font-size:0.9rem; font-weight:600; color:#94a3b8; margin-bottom:0.25rem;">{% trans "No Live Stream" %}</div>
-            <div style="font-size:0.78rem; color:#475569;">{% trans "Configure a camera with .mp4 or .m3u8 URL." %}</div>
-          </div>
-        {% endif %}
+        <video id="live-video" style="width:100%; max-height:480px; object-fit:cover; display:block;" controls muted></video>
       </div>
 
     </div>
+    {% else %}
+    <!-- Compact placeholder when no camera is configured -->
+    <div class="card border-0 h-100" style="border-radius:14px; overflow:hidden; min-height:160px;">
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;
+                  height:100%; min-height:160px; padding:2rem;
+                  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                  text-align:center; gap:0.75rem;">
+        <div style="width:52px; height:52px; border-radius:50%; background:#e2e8f0;
+                    display:flex; align-items:center; justify-content:center;">
+          <i class="bi bi-camera-video-off" style="font-size:1.4rem; color:#94a3b8;"></i>
+        </div>
+        <div>
+          <div style="font-size:0.9rem; font-weight:700; color:#475569; margin-bottom:0.25rem;">{% trans "No Camera Configured" %}</div>
+          <div style="font-size:0.78rem; color:#94a3b8;">{% trans "Add a camera with a stream URL to enable live monitoring." %}</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
   </div>
 
   <!-- IoT Readings Panel -->
@@ -233,6 +243,12 @@
            style="background:rgba(255,255,255,0.12); color:#fff; border:1.5px solid rgba(255,255,255,0.2); border-radius:12px; padding:0.65rem; font-size:0.85rem; font-weight:600; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:all 0.2s; min-height:48px; font-family:'Inter',sans-serif; backdrop-filter:blur(4px);">
           <i class="bi bi-file-earmark-bar-graph" style="font-size:1.05rem; color:#93c5fd;"></i>
           {% trans "Generate 24hr Report" %}
+        </a>
+
+        <a href="{% url 'forecast' pond.id %}"
+           style="background:rgba(69,177,232,0.2); color:#45B1E8; border:1.5px solid rgba(69,177,232,0.4); border-radius:12px; padding:0.65rem; font-size:0.85rem; font-weight:700; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:all 0.2s; min-height:48px; font-family:'Inter',sans-serif;">
+          <i class="bi bi-graph-up-arrow" style="font-size:1.05rem;"></i>
+          {% trans "View AI Forecast" %}
         </a>
 
         <form action="{% url 'pond_action_calibrate' pond.id %}" method="POST" class="mt-auto">

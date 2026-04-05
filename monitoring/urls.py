@@ -28,6 +28,7 @@ urlpatterns = [
     path('ponds/<int:pond_id>/action/aerator/',   views.pond_action_aerator,   name='pond_action_aerator'),
     path('ponds/<int:pond_id>/action/calibrate/', views.pond_action_calibrate, name='pond_action_calibrate'),
     path('ponds/<int:pond_id>/action/report/',    views.pond_action_report,    name='pond_action_report'),
+    path('ponds/<int:pond_id>/forecast/',         views.forecast_view,         name='forecast'),
 
     # Alerts
     path('alerts/',                           views.alerts_list,          name='alerts_list'),

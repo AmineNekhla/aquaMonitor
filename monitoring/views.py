@@ -619,3 +619,86 @@ def map_farm_context(request, farm_id):
         'alerts': alerts_data
     })
 
+
+
+# ─── Forecast View ──────────────────────────────────────────────────────────────────────────────
+@login_required
+def forecast_view(request, pond_id):
+    from .models import Forecast
+    from .ai_client import get_forecast, check_ai_health
+    from .ai_inference import get_history_readings, get_latest_readings
+
+    if is_admin(request.user):
+        pond = get_object_or_404(Pond, id=pond_id)
+    else:
+        pond = get_object_or_404(Pond, id=pond_id, farm__owner=request.user)
+
+    forecast_data = []
+    source = 'db'
+
+    try:
+        if check_ai_health():
+            readings  = get_latest_readings(pond)
+            ammonia   = readings.get('ammonia',   0.1)
+            nitrite   = readings.get('nitrite',   0.1)
+            turbidity = readings.get('turbidity', 10.0)
+            history   = get_history_readings(pond, hours=24)
+            result = get_forecast(
+                history=history,
+                current_ammonia=ammonia,
+                current_nitrite=nitrite,
+                current_turbidity=turbidity,
+                n_hours=6,
+            )
+            if result and 'forecast' in result:
+                forecast_data = result['forecast']
+                source = 'live'
+    except Exception:
+        pass
+
+    if not forecast_data:
+        stored = sorted(pond.forecasts.order_by('-created_at')[:6], key=lambda f: f.hour_offset)
+        for f in stored:
+            forecast_data.append({
+                'hour':    f.hour_offset,
+                'temp':    round(f.temp,    2),
+                'do':      round(f.do,      2),
+                'ph':      round(f.ph,      2),
+                'ammonia': round(f.ammonia, 2),
+                'status':  f.status,
+                'issues':  f.issues,
+                'actions': f.actions,
+            })
+        if stored:
+            source = 'db'
+
+    for item in forecast_data:
+        raw_issues  = item.get('issues',  '') or ''
+        raw_actions = item.get('actions', '') or ''
+        item['issues_list']  = [i.strip() for i in raw_issues.split('|')  if i.strip()]
+        item['actions_list'] = [a.strip() for a in raw_actions.split('|') if a.strip()]
+
+    all_actions = []
+    seen_actions = set()
+    for item in forecast_data:
+        for action in item['actions_list']:
+            if action not in seen_actions:
+                seen_actions.add(action)
+                all_actions.append(action)
+
+    chart_labels = ['H+' + str(item['hour']) for item in forecast_data]
+    chart_temp   = [item['temp'] for item in forecast_data]
+    chart_do     = [item['do']   for item in forecast_data]
+    chart_ph     = [item['ph']   for item in forecast_data]
+
+    context = {
+        'pond':         pond,
+        'forecast':     forecast_data,
+        'all_actions':  all_actions,
+        'source':       source,
+        'chart_labels': json.dumps(chart_labels),
+        'chart_temp':   json.dumps(chart_temp),
+        'chart_do':     json.dumps(chart_do),
+        'chart_ph':     json.dumps(chart_ph),
+    }
+    return render(request, 'monitoring/forecast.html', context)
