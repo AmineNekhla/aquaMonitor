@@ -14,7 +14,8 @@ COPY requirements.txt /app/
 
 # Upgrade pip and install Python dependencies
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install -r requirements.txt && \
+    pip install django-celery-beat==2.5.0
 
 # Copy the entire project code into the container
 COPY . /app/
