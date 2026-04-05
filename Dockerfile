@@ -21,7 +21,8 @@ WORKDIR /app
 # (psycopg2-binary is pre-compiled – no system build deps needed)
 COPY requirements.txt /app/
 
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt && \
+    pip install django-celery-beat==2.5.0
 
 # Copy the entire project code into the container
 COPY . /app/

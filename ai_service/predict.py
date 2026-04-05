@@ -144,13 +144,13 @@ def predict_forecast(data: dict) -> dict:
     """
     Predict water quality for next n_hours using recursive LSTM.
     input: history (list of the last 24hrs data with temp/do/ph/ammonia),
-               current_ammonia, current_nitrite, current_turbidity, n_hours
+            current_ammonia, current_nitrite, current_turbidity, n_hours
     """
-    history          = pd.DataFrame(data["history"])[FEATURES_2].values
-    current_ammonia  = data["current_ammonia"]
-    current_nitrite  = data["current_nitrite"]
+    history           = pd.DataFrame(data["history"])[FEATURES_2].values
+    current_ammonia   = data["current_ammonia"]
+    current_nitrite   = data["current_nitrite"]
     current_turbidity = data["current_turbidity"]
-    n_hours          = data.get("n_hours", 6)
+    n_hours           = data.get("n_hours", 6)
 
     forecast = []
 
