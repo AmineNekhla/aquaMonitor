@@ -1,7 +1,16 @@
-# Use an official lightweight Python image
 FROM python:3.11-slim
 
-# Prevent Python from writing .pyc files or buffering stdout/stderr
+# System dependencies for OpenCV
+RUN apt-get update && apt-get install -y \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libxcb1 \
+    libgl1 \
+ && rm -rf /var/lib/apt/lists/*
+
+# Python environment
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -12,9 +21,7 @@ WORKDIR /app
 # (psycopg2-binary is pre-compiled – no system build deps needed)
 COPY requirements.txt /app/
 
-# Upgrade pip and install Python dependencies
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire project code into the container
 COPY . /app/
@@ -22,5 +29,5 @@ COPY . /app/
 # Expose the standard Django port
 EXPOSE 8000
 
-# Start the Django development server (suitable for student projects)
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+

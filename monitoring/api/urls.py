@@ -18,4 +18,9 @@ urlpatterns = [
     # Forecast Routes
     path('forecasts/', views.ForecastListView.as_view(), name='forecast-list'),
     path('ponds/<int:pond_id>/forecasts/', views.PondForecastView.as_view(), name='pond-forecasts'),
+    
+    #H: cam fish disease detection routes
+    path('disease-detections/', views.DiseaseDetectionListView.as_view(), name='disease-detections'),
+    path('disease-alerts/', views.DiseaseAlertsView.as_view(), name='disease-alerts'),
+    path('disease-alerts/<int:alert_id>/acknowledge/', views.DiseaseAlertsView.as_view(), name='acknowledge-alert'),
 ]

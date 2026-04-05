@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from monitoring.models import ESPDevice, DeviceCommand, SensorReading, Alert, Forecast
+from monitoring.models import ESPDevice, DeviceCommand, SensorReading, Alert, Forecast,DiseaseDetection, DiseaseAlert
 
 
 class DeviceRegisterSerializer(serializers.ModelSerializer):
@@ -58,3 +58,30 @@ class ForecastSerializer(serializers.ModelSerializer):
             'actions',
         ]
         read_only_fields = ['id', 'created_at']
+        
+          
+class DiseaseDetectionSerializer(serializers.ModelSerializer):
+    pond_name = serializers.CharField(source='pond.name', read_only=True)
+    
+    class Meta:
+        model = DiseaseDetection
+        fields = [
+            'id', 'pond', 'pond_name', 'disease_type', 'confidence',
+            'frame_timestamp', 'severity', 'affected_area_percentage',
+            'model_version'
+        ]
+        read_only_fields = ['id', 'frame_timestamp']
+
+
+class DiseaseAlertSerializer(serializers.ModelSerializer):
+    pond_name = serializers.CharField(source='pond.name', read_only=True)
+    disease_type = serializers.CharField(source='disease_detection.disease_type', read_only=True)
+    
+    class Meta:
+        model = DiseaseAlert
+        fields = [
+            'id', 'pond', 'pond_name', 'disease_type', 'alert_type',
+            'message', 'severity', 'created_at', 'acknowledged'
+        ]
+        read_only_fields = ['id', 'created_at']
+

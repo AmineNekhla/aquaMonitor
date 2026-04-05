@@ -189,3 +189,74 @@ class PondForecastView(views.APIView):
             'count': len(forecasts),
             'data': serializer.data
         })
+        
+        
+        
+        
+class DiseaseDetectionListView(views.APIView):
+    """
+    GET /api/v1/disease-detections/
+    Get all disease detections for user's ponds.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        from monitoring.models import DiseaseDetection
+        
+        user_farms = Farm.objects.filter(owner=request.user)
+        user_ponds = Pond.objects.filter(farm__in=user_farms)
+        
+        # Get detections from last 7 days
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        seven_days_ago = timezone.now() - timedelta(days=7)
+        detections = DiseaseDetection.objects.filter(
+            pond__in=user_ponds,
+            frame_timestamp__gte=seven_days_ago
+        ).order_by('-frame_timestamp')[:50]
+        
+        from monitoring.api.serializers import DiseaseDetectionSerializer
+        serializer = DiseaseDetectionSerializer(detections, many=True)
+        return Response({
+            'count': len(detections),
+            'data': serializer.data
+        })
+
+
+class DiseaseAlertsView(views.APIView):
+    """
+    GET /api/v1/disease-alerts/
+    Get unacknowledged disease alerts.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        from monitoring.models import DiseaseAlert
+        
+        user_farms = Farm.objects.filter(owner=request.user)
+        user_ponds = Pond.objects.filter(farm__in=user_farms)
+        
+        alerts = DiseaseAlert.objects.filter(
+            pond__in=user_ponds,
+            acknowledged=False
+        ).order_by('-created_at')[:20]
+        
+        from monitoring.api.serializers import DiseaseAlertSerializer
+        serializer = DiseaseAlertSerializer(alerts, many=True)
+        return Response({
+            'count': len(alerts),
+            'data': serializer.data
+        })
+    
+    def post(self, request, alert_id=None):
+        """Acknowledge an alert."""
+        from monitoring.models import DiseaseAlert
+        from django.utils import timezone
+        
+        alert = get_object_or_404(DiseaseAlert, id=alert_id)
+        alert.acknowledged = True
+        alert.acknowledged_at = timezone.now()
+        alert.save()
+        
+        return Response({'status': 'acknowledged'})

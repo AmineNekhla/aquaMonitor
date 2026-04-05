@@ -155,6 +155,14 @@ class Camera(models.Model):
     status       = models.CharField(max_length=20, choices=STATUS_CHOICES, default='online')
     installed_at = models.DateField()
 
+    #H: for model3 integration
+    video_file = models.FileField(
+        upload_to='videos/%Y/%m/%d/',
+        null=True,
+        blank=True,
+        help_text='Uploaded video file for disease detection'
+    )
+    last_disease_scan = models.DateTimeField(null=True, blank=True)
     def __str__(self):
         return f"{self.name} ({self.pond.name})"
 
@@ -302,3 +310,90 @@ class DeviceCommand(models.Model):
 
     def __str__(self):
         return f"{self.command_name} -> {self.device.name} [{self.status}]"
+    
+    
+    
+    
+#H: for model 3 desease detection
+class DiseaseDetection(models.Model):
+    """Model to store disease classifications from video frames."""
+    
+    DISEASE_CHOICES = [
+        ('healthy', 'Healthy'),
+        ('spot_disease', 'Spot Disease'),
+        ('white_spot', 'White Spot Disease'),
+        ('bacterial_infection', 'Bacterial Infection'),
+        ('fungal_infection', 'Fungal Infection'),
+        ('parasitic_infection', 'Parasitic Infection'),
+        ('unknown', 'Unknown/Unclear'),
+    ]
+    
+    pond = models.ForeignKey(Pond, on_delete=models.CASCADE, related_name='disease_detections')
+    camera = models.ForeignKey('monitoring.Camera', on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # Disease classification
+    disease_type = models.CharField(max_length=50, choices=DISEASE_CHOICES)
+    confidence = models.FloatField(default=0.0, help_text="Confidence score 0-1")
+    
+    # Frame information
+    frame_timestamp = models.DateTimeField(auto_now_add=True)
+    frame_image = models.ImageField(upload_to='disease_frames/%Y/%m/%d/', null=True, blank=True)
+    
+    # Analysis details
+    affected_area_percentage = models.FloatField(default=0.0, help_text="Percentage of fish/area affected")
+    severity = models.CharField(
+        max_length=20,
+        choices=[('mild', 'Mild'), ('moderate', 'Moderate'), ('severe', 'Severe')],
+        default='mild'
+    )
+    
+    # Metadata
+    model_version = models.CharField(max_length=50, default='huggingface-saon110-v1')
+    processed_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-frame_timestamp']
+        indexes = [
+            models.Index(fields=['pond', '-frame_timestamp']),
+            models.Index(fields=['disease_type', '-frame_timestamp']),
+        ]
+    
+    def __str__(self):
+        return f"{self.pond.name} - {self.disease_type} ({self.confidence:.2%})"
+
+
+class DiseaseAlert(models.Model):
+    """Alert triggered when disease is detected."""
+    
+    disease_detection = models.OneToOneField(DiseaseDetection, on_delete=models.CASCADE)
+    pond = models.ForeignKey(Pond, on_delete=models.CASCADE)
+    
+    alert_type = models.CharField(max_length=50, choices=[
+        ('disease_detected', 'Disease Detected'),
+        ('disease_spread', 'Disease Spread Detected'),
+        ('high_confidence', 'High Confidence Detection'),
+    ])
+    
+    message = models.TextField()
+    severity = models.CharField(max_length=20, choices=[
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('critical', 'Critical'),
+    ])
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    acknowledged = models.BooleanField(default=False)
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Alert: {self.pond.name} - {self.disease_detection.disease_type}"
+    
+    
+    
+
+
+
