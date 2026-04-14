@@ -58,8 +58,12 @@
       <a href="{% url 'farms_list' %}" class="sidebar-mobile-link {% if 'farm' in request.resolver_match.url_name %}active{% endif %}">
         <i class="bi bi-geo-alt"></i> {% trans "Farms" %}
       </a>
-      <a href="{% url 'ponds_list' %}" class="sidebar-mobile-link {% if 'pond' in request.resolver_match.url_name %}active{% endif %}">
+      <a href="{% url 'ponds_list' %}" class="sidebar-mobile-link {% if 'pond' in request.resolver_match.url_name and 'forecast' not in request.resolver_match.url_name %}active{% endif %}">
         <i class="bi bi-droplet-half"></i> {% trans "Ponds" %}
+      </a>
+      <a href="{% url 'ponds_list' %}" class="sidebar-mobile-link {% if 'forecast' in request.resolver_match.url_name %}active{% endif %}" id="mobile-nav-forecast" title="{% trans 'AI Forecasting — select a pond to view predictions' %}">
+        <i class="bi bi-graph-up-arrow"></i> {% trans "Forecasting" %}
+        <span style="margin-left:auto; font-size:0.58rem; background:rgba(69,177,232,0.25); color:#45B1E8; padding:2px 6px; border-radius:6px; font-weight:700; letter-spacing:0.04em;">AI</span>
       </a>
       <a href="{% url 'alerts_list' %}" class="sidebar-mobile-link {% if request.resolver_match.url_name == 'alerts_list' %}active{% endif %}">
         <i class="bi bi-bell"></i> {% trans "Alerts" %}
@@ -100,6 +104,23 @@
 .sidebar-mobile-link .alert-badge {
   margin-left: auto; background: #ef4444; color: #fff;
   font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 10px;
+}
+/* Forecasting AI badge in sidebar */
+.forecast-ai-badge {
+  margin-left: auto;
+  font-size: 0.55rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(69,177,232,0.2);
+  color: #45B1E8;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(69,177,232,0.3);
+  transition: all 0.2s;
+}
+.nav-link.active .forecast-ai-badge {
+  background: rgba(69,177,232,0.35);
+  color: #fff;
 }
 </style>
 
@@ -155,10 +176,19 @@
       </a>
 
       <a href="{% url 'ponds_list' %}"
-         class="nav-link {% if 'pond' in request.resolver_match.url_name %}active{% endif %}"
+         class="nav-link {% if 'pond' in request.resolver_match.url_name and 'forecast' not in request.resolver_match.url_name %}active{% endif %}"
          id="nav-ponds">
         <i class="bi bi-droplet-half nav-icon"></i>
         <span class="nav-label">{% trans "Ponds" %}</span>
+      </a>
+
+      <a href="{% url 'ponds_list' %}"
+         class="nav-link {% if 'forecast' in request.resolver_match.url_name %}active{% endif %}"
+         id="nav-forecast"
+         title="{% trans 'AI Forecasting — select a pond to view predictions' %}">
+        <i class="bi bi-graph-up-arrow nav-icon"></i>
+        <span class="nav-label">{% trans "Forecasting" %}</span>
+        <span class="forecast-ai-badge">AI</span>
       </a>
 
       <a href="{% url 'alerts_list' %}"

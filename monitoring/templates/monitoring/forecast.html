@@ -7,103 +7,179 @@
 
 {% block content %}
 
-<!-- Breadcrumb -->
+{# ─── Breadcrumb ─────────────────────────────────────────────── #}
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb" style="font-size:0.8rem; font-family:'Inter',sans-serif;">
-    <li class="breadcrumb-item"><a href="{% url 'farms_list' %}" style="color:#45B1E8; text-decoration:none;">Farms</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'farms_list' %}" style="color:#45B1E8; text-decoration:none;">{% trans "Farms" %}</a></li>
     <li class="breadcrumb-item"><a href="{% url 'farm_detail' pond.farm.id %}" style="color:#45B1E8; text-decoration:none;">{{ pond.farm.name }}</a></li>
     <li class="breadcrumb-item"><a href="{% url 'pond_detail' pond.id %}" style="color:#45B1E8; text-decoration:none;">{{ pond.name }}</a></li>
-    <li class="breadcrumb-item active" style="color:#64748b;">AI Forecast</li>
+    <li class="breadcrumb-item active" style="color:#64748b;">{% trans "AI Forecast" %}</li>
   </ol>
 </nav>
 
-<!-- ══ HEADER ════════════════════════════════════════════════════ -->
-<div class="forecast-header mb-4">
-  <div class="forecast-header-content">
-    <div class="forecast-icon-wrap">
+{# ─── Page Header ────────────────────────────────────────────── #}
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <div class="fc-hero-icon">
       <i class="bi bi-graph-up-arrow"></i>
     </div>
     <div>
-      <h2 class="forecast-title">Water Quality Forecast</h2>
-      <p class="forecast-subtitle">
-        <i class="bi bi-water me-1"></i>{{ pond.name }}
-        <span class="forecast-divider">·</span>
-        <i class="bi bi-geo-alt me-1"></i>{{ pond.farm.name }}
-        <span class="forecast-divider">·</span>
-        <i class="bi bi-clock me-1"></i>Next 6 Hours
-      </p>
+      <h2 class="fc-page-title">{% trans "Water Quality Forecast" %}</h2>
+      <div style="font-size:0.8rem; color:#64748b; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+        <span><i class="bi bi-water me-1" style="color:#45B1E8;"></i>{{ pond.name }}</span>
+        <span style="color:#cbd5e1;">·</span>
+        <span><i class="bi bi-geo-alt me-1" style="color:#45B1E8;"></i>{{ pond.farm.name }}</span>
+        <span style="color:#cbd5e1;">·</span>
+        <span><i class="bi bi-clock me-1" style="color:#45B1E8;"></i>{% trans "Next 6 Hours" %}</span>
+      </div>
     </div>
   </div>
-  <div class="forecast-header-actions">
-    {% if source == 'live' %}
-      <span class="source-badge source-live"><span class="pulse-dot"></span>Live AI</span>
-    {% else %}
-      <span class="source-badge source-db"><i class="bi bi-database me-1"></i>Stored</span>
+  <div class="d-flex align-items-center gap-2 flex-wrap">
+    {% if forecast %}
+      {% if source == 'live' %}
+        <span class="fc-source-badge fc-source-live"><span class="pulse-dot"></span>{% trans "Live AI" %}</span>
+      {% else %}
+        <span class="fc-source-badge fc-source-db"><i class="bi bi-database me-1"></i>{% trans "Stored" %}</span>
+      {% endif %}
     {% endif %}
-    <a href="{% url 'pond_detail' pond.id %}" class="btn-back">
-      <i class="bi bi-arrow-left me-1"></i>Back to Pond
+    <a href="{% url 'pond_detail' pond.id %}" class="fc-btn-back">
+      <i class="bi bi-arrow-left me-1"></i>{% trans "Back to Pond" %}
     </a>
   </div>
 </div>
 
+{# ─── Empty State ────────────────────────────────────────────── #}
 {% if not forecast %}
-<!-- Empty State -->
-<div class="forecast-empty">
-  <div class="forecast-empty-icon">
-    <i class="bi bi-cloud-slash"></i>
-  </div>
-  <h3>No Forecast Available</h3>
-  <p>The AI service is offline and there are no stored forecasts for this pond yet.<br>
-     Run a seed or inference job to generate forecast data.</p>
-  <a href="{% url 'pond_detail' pond.id %}" class="forecast-btn-primary">
-    <i class="bi bi-arrow-left me-2"></i>Return to Pond
+<div class="fc-empty">
+  <div class="fc-empty-icon"><i class="bi bi-cloud-slash"></i></div>
+  <h3>{% trans "No Forecast Available" %}</h3>
+  <p>{% trans "The AI service is offline and there are no stored forecasts for this pond yet." %}<br>
+     {% trans "Run a seed or inference job to generate forecast data." %}</p>
+  <a href="{% url 'pond_detail' pond.id %}" class="fc-btn-primary">
+    <i class="bi bi-arrow-left me-2"></i>{% trans "Return to Pond" %}
   </a>
 </div>
+
 {% else %}
 
-<!-- ══ KPI SUMMARY STRIP ════════════════════════════════════════ -->
-<div class="kpi-strip mb-4">
-  {% for item in forecast %}
-  <div class="kpi-card {% if item.status == 'Good' %}kpi-good{% elif item.status == 'Warning' %}kpi-warning{% else %}kpi-risk{% endif %}">
-    <div class="kpi-hour">H+{{ item.hour }}</div>
-    <div class="kpi-status-badge {% if item.status == 'Good' %}badge-good{% elif item.status == 'Warning' %}badge-warn{% else %}badge-risk{% endif %}">
-      {% if item.status == 'Good' %}<i class="bi bi-check-circle-fill me-1"></i>{% elif item.status == 'Warning' %}<i class="bi bi-exclamation-triangle-fill me-1"></i>{% else %}<i class="bi bi-x-octagon-fill me-1"></i>{% endif %}
-      {{ item.status }}
-    </div>
-    <div class="kpi-params">
-      <span title="Temperature"><i class="bi bi-thermometer-half text-orange"></i> {{ item.temp }}°C</span>
-      <span title="Dissolved Oxygen"><i class="bi bi-moisture text-blue"></i> {{ item.do }} mg/L</span>
-      <span title="pH"><i class="bi bi-droplet-half text-purple"></i> {{ item.ph }}</span>
-    </div>
-  </div>
-  {% endfor %}
-</div>
-
-<!-- ══ MAIN GRID ════════════════════════════════════════════════ -->
 <div class="row g-4 mb-4">
 
-  <!-- Chart -->
+  {# ── Assessment Panel ─────────────────────────────────────── #}
+  <div class="col-lg-3">
+    <div class="card border-0 h-100 fc-assessment-card">
+      <div class="card-body p-4 d-flex flex-column justify-content-between" style="gap:1rem;">
+
+        <div>
+          <div class="fc-section-label mb-3">
+            <i class="bi bi-shield-check me-1" style="color:#45B1E8;"></i>{% trans "Overall Assessment" %}
+          </div>
+
+          {# Overall badge — populated by JS #}
+          <div id="fc-overall-badge" class="mb-3">
+            <span class="fc-overall-status status-loading">
+              <i class="bi bi-hourglass-split me-2"></i>{% trans "Analysing..." %}
+            </span>
+          </div>
+
+          {# Hidden data nodes for JS to read #}
+          <div id="fc-status-data" style="display:none;">
+            {% for item in forecast %}
+              <span data-status="{{ item.status }}"></span>
+            {% endfor %}
+          </div>
+
+          {# Colour-coded dot row #}
+          <div class="fc-stat-row mb-3">
+            {% for item in forecast %}
+              {% if item.status == 'Good' %}<span class="fc-stat-dot dot-good" title="H+{{ item.hour }}: Good"></span>{% endif %}
+              {% if item.status == 'Warning' %}<span class="fc-stat-dot dot-warn" title="H+{{ item.hour }}: Warning"></span>{% endif %}
+              {% if item.status == 'Risk' %}<span class="fc-stat-dot dot-risk" title="H+{{ item.hour }}: Risk"></span>{% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          <div class="fc-mini-stat">
+            <span><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> {% trans "Good Hours" %}</span>
+            <span class="fc-mini-val" id="count-good">—</span>
+          </div>
+          <div class="fc-mini-stat">
+            <span><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i> {% trans "Warning" %}</span>
+            <span class="fc-mini-val" id="count-warn">—</span>
+          </div>
+          <div class="fc-mini-stat">
+            <span><i class="bi bi-x-octagon-fill" style="color:#ef4444;"></i> {% trans "At Risk" %}</span>
+            <span class="fc-mini-val" id="count-risk">—</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  {# ── KPI Strip ────────────────────────────────────────────── #}
+  <div class="col-lg-9">
+    <div class="h-100 d-flex flex-column" style="gap:0.75rem;">
+      <div class="fc-section-label">
+        <i class="bi bi-bar-chart-line me-1" style="color:#45B1E8;"></i>{% trans "Hour-by-Hour Status" %}
+      </div>
+      <div class="fc-kpi-strip">
+        {% for item in forecast %}
+        <div class="fc-kpi {% if item.status == 'Good' %}kpi-good{% elif item.status == 'Warning' %}kpi-warn{% else %}kpi-risk{% endif %}">
+          <div class="fc-kpi-hour">H+{{ item.hour }}</div>
+          <div class="fc-kpi-badge {% if item.status == 'Good' %}badge-good{% elif item.status == 'Warning' %}badge-warn{% else %}badge-risk{% endif %}">
+            {% if item.status == 'Good' %}
+              <i class="bi bi-check-circle-fill me-1"></i>{{ item.status }}
+            {% elif item.status == 'Warning' %}
+              <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ item.status }}
+            {% else %}
+              <i class="bi bi-x-octagon-fill me-1"></i>{{ item.status }}
+            {% endif %}
+          </div>
+          <div class="fc-kpi-params">
+            <span><i class="bi bi-thermometer-half" style="color:#f97316;"></i> {{ item.temp }}°C</span>
+            <span><i class="bi bi-moisture" style="color:#45B1E8;"></i> {{ item.do }} mg/L</span>
+            <span><i class="bi bi-droplet-half" style="color:#a855f7;"></i> pH {{ item.ph }}</span>
+            <span><i class="bi bi-flask" style="color:#14b8a6;"></i> {{ item.ammonia }} mg/L</span>
+          </div>
+          {% if item.issues_list %}
+          <div class="fc-kpi-issues">
+            {% for issue in item.issues_list %}
+            <span>⚠ {{ issue }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<div class="row g-4 mb-4">
+
   <div class="col-lg-8">
     <div class="card border-0 h-100">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-activity me-2" style="color:#45B1E8;"></i>Predicted Parameter Trends</span>
-        <span class="badge-status badge-info" style="font-size:0.68rem;">Next 6 Hours</span>
+        <span><i class="bi bi-activity me-2" style="color:#45B1E8;"></i>{% trans "Predicted Parameter Trends" %}</span>
+        <span class="badge-status badge-info" style="font-size:0.68rem;">{% trans "Next 6 Hours" %}</span>
       </div>
       <div class="card-body" style="padding:1.25rem;">
-        <canvas id="forecastChart" style="width:100%; max-height:280px;"></canvas>
+        <canvas id="forecastChart" style="width:100%; max-height:300px;"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- Recommended Actions -->
   <div class="col-lg-4">
     <div class="card border-0 h-100" style="background:linear-gradient(145deg,#1a2e52 0%,#0f172a 100%);">
       <div class="card-body p-4 d-flex flex-column" style="color:#fff; gap:0.75rem;">
-        <div style="font-size:0.85rem; font-weight:700; text-align:center; color:#fff; margin-bottom:0.5rem;">
-          <i class="bi bi-lightbulb-fill me-2" style="color:#fbbf24;"></i>Recommended Actions
+        <div style="font-size:0.85rem; font-weight:700; color:#fff; text-align:center; margin-bottom:0.5rem;">
+          <i class="bi bi-lightbulb-fill me-2" style="color:#fbbf24;"></i>{% trans "Recommended Actions" %}
         </div>
         {% if all_actions %}
-        <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem;">
+        <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem; overflow-y:auto; max-height:240px;">
           {% for action in all_actions %}
           <li style="display:flex; align-items:flex-start; gap:0.65rem; background:rgba(255,255,255,0.07); border-radius:10px; padding:0.65rem 0.9rem; font-size:0.82rem; line-height:1.5; color:#e2e8f0;">
             <i class="bi bi-arrow-right-circle-fill" style="color:#45B1E8; font-size:1rem; margin-top:0.1rem; flex-shrink:0;"></i>
@@ -113,8 +189,9 @@
         </ul>
         {% else %}
         <div style="text-align:center; color:rgba(255,255,255,0.5); font-size:0.82rem; margin:auto;">
-          <i class="bi bi-check2-all" style="font-size:2rem; display:block; margin-bottom:0.5rem; color:#10b981;"></i>
-          No actions required — all parameters are within safe range.
+          <i class="bi bi-check2-all" style="font-size:2.5rem; display:block; margin-bottom:0.75rem; color:#10b981;"></i>
+          <div style="font-size:0.9rem; font-weight:600; color:#10b981; margin-bottom:0.25rem;">{% trans "All Clear" %}</div>
+          {% trans "No actions required — all parameters within safe range." %}
         </div>
         {% endif %}
       </div>
@@ -123,242 +200,281 @@
 
 </div>
 
-<!-- ══ DETAILED FORECAST TABLE ══ -->
-<div class="card border-0 mb-4">
-  <div class="card-header">
-    <i class="bi bi-table me-2" style="color:#45B1E8;"></i>Hour-by-Hour Breakdown
+
+<div class="row g-4 mb-4">
+
+  <div class="col-lg-8">
+    <div class="card border-0 h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-table me-2" style="color:#45B1E8;"></i>{% trans "Hour-by-Hour Breakdown" %}</span>
+        <span class="badge-status badge-info" style="font-size:0.68rem;">{{ forecast|length }} {% trans "hours" %}</span>
+      </div>
+      <div class="table-responsive">
+        <table class="fc-table">
+          <thead>
+            <tr>
+              <th>{% trans "Hour" %}</th>
+              <th><i class="bi bi-thermometer-half" style="color:#f97316;"></i> {% trans "Temp" %} (°C)</th>
+              <th><i class="bi bi-moisture" style="color:#45B1E8;"></i> DO (mg/L)</th>
+              <th><i class="bi bi-droplet-half" style="color:#a855f7;"></i> pH</th>
+              <th><i class="bi bi-flask" style="color:#14b8a6;"></i> {% trans "Ammonia" %} (mg/L)</th>
+              <th>{% trans "Status" %}</th>
+              <th>{% trans "Issues" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in forecast %}
+            <tr class="{% if item.status == 'Risk' %}row-risk{% elif item.status == 'Warning' %}row-warning{% else %}row-good{% endif %}">
+              <td>
+                <div class="fc-hour-chip"><i class="bi bi-clock me-1"></i>{% trans "Hour" %} {{ item.hour }}</div>
+              </td>
+              <td class="fw-600">{{ item.temp }}</td>
+              <td class="fw-600">{{ item.do }}</td>
+              <td class="fw-600">{{ item.ph }}</td>
+              <td class="fw-600">{{ item.ammonia }}</td>
+              <td>
+                {% if item.status == 'Good' %}
+                  <span class="fc-table-badge badge-good"><i class="bi bi-check-circle-fill me-1"></i>{% trans "Good" %}</span>
+                {% elif item.status == 'Warning' %}
+                  <span class="fc-table-badge badge-warn"><i class="bi bi-exclamation-triangle-fill me-1"></i>{% trans "Warning" %}</span>
+                {% else %}
+                  <span class="fc-table-badge badge-risk"><i class="bi bi-x-octagon-fill me-1"></i>{% trans "Risk" %}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if item.issues_list %}
+                  <ul class="fc-issue-list">
+                    {% for issue in item.issues_list %}<li>{{ issue }}</li>{% endfor %}
+                  </ul>
+                {% else %}
+                  <span style="color:#94a3b8; font-size:0.78rem;">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-  <div class="table-responsive">
-    <table class="forecast-table">
-      <thead>
-        <tr>
-          <th>Hour</th>
-          <th><i class="bi bi-thermometer-half text-orange me-1"></i>Temp (°C)</th>
-          <th><i class="bi bi-moisture text-blue me-1"></i>DO (mg/L)</th>
-          <th><i class="bi bi-droplet-half text-purple me-1"></i>pH</th>
-          <th><i class="bi bi-flask text-teal me-1"></i>Ammonia (mg/L)</th>
-          <th>Status</th>
-          <th>Issues</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in forecast %}
-        <tr class="{% if item.status == 'Risk' %}row-risk{% elif item.status == 'Warning' %}row-warning{% else %}row-good{% endif %}">
-          <td>
-            <div class="hour-chip">
-              <i class="bi bi-clock me-1"></i>Hour {{ item.hour }}
-            </div>
-          </td>
-          <td class="fw-600">{{ item.temp }}</td>
-          <td class="fw-600">{{ item.do }}</td>
-          <td class="fw-600">{{ item.ph }}</td>
-          <td class="fw-600">{{ item.ammonia }}</td>
-          <td>
-            {% if item.status == 'Good' %}
-              <span class="table-badge badge-good"><i class="bi bi-check-circle-fill me-1"></i>Good</span>
-            {% elif item.status == 'Warning' %}
-              <span class="table-badge badge-warn"><i class="bi bi-exclamation-triangle-fill me-1"></i>Warning</span>
-            {% else %}
-              <span class="table-badge badge-risk"><i class="bi bi-x-octagon-fill me-1"></i>Risk</span>
-            {% endif %}
-          </td>
-          <td>
+
+  <div class="col-lg-4">
+    <div class="card border-0 h-100">
+      <div class="card-header">
+        <i class="bi bi-exclamation-triangle-fill me-2" style="color:#f59e0b;"></i>{% trans "Predicted Risk Events" %}
+      </div>
+      <div class="card-body" style="padding:1.25rem;">
+        <div class="fc-timeline" id="alerts-timeline">
+          {% for item in forecast %}
             {% if item.issues_list %}
-              <ul class="issue-list">
-                {% for issue in item.issues_list %}
-                  <li>{{ issue }}</li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <span style="color:#94a3b8; font-size:0.78rem;">—</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- ══ FUTURE ALERTS SECTION ══ -->
-<div class="card border-0 mb-4">
-  <div class="card-header">
-    <i class="bi bi-exclamation-triangle-fill me-2" style="color:#f59e0b;"></i>Predicted Risk Events
-  </div>
-  <div class="card-body" style="padding:1.25rem;">
-    <div class="alerts-timeline" id="alerts-timeline">
-      {% for item in forecast %}
-        {% if item.issues_list %}
-        <div class="timeline-item {% if item.status == 'Risk' %}timeline-risk{% else %}timeline-warning{% endif %}">
-          <div class="timeline-dot"></div>
-          <div class="timeline-content">
-            <div class="timeline-header">
-              <span class="timeline-hour">Hour {{ item.hour }}</span>
-              {% if item.status == 'Risk' %}
-                <span class="table-badge badge-risk" style="font-size:0.65rem;">Risk</span>
-              {% else %}
-                <span class="table-badge badge-warn" style="font-size:0.65rem;">Warning</span>
-              {% endif %}
+            <div class="fc-timeline-item {% if item.status == 'Risk' %}tl-risk{% else %}tl-warn{% endif %}">
+              <div class="fc-tl-dot"></div>
+              <div class="fc-tl-content">
+                <div class="fc-tl-header">
+                  <span class="fc-tl-hour">{% trans "Hour" %} {{ item.hour }}</span>
+                  {% if item.status == 'Risk' %}
+                    <span class="fc-table-badge badge-risk" style="font-size:0.65rem;">{% trans "Risk" %}</span>
+                  {% else %}
+                    <span class="fc-table-badge badge-warn" style="font-size:0.65rem;">{% trans "Warning" %}</span>
+                  {% endif %}
+                </div>
+                <ul class="fc-tl-issues">
+                  {% for issue in item.issues_list %}<li>{{ issue }}</li>{% endfor %}
+                </ul>
+              </div>
             </div>
-            <ul class="timeline-issues">
-              {% for issue in item.issues_list %}
-                <li>{{ issue }}</li>
-              {% endfor %}
-            </ul>
-          </div>
+            {% endif %}
+          {% endfor %}
         </div>
-        {% endif %}
-      {% endfor %}
-    </div>
-
-    <!-- All-clear message — shown by JS if no timeline items exist -->
-    <div id="all-clear-msg" style="display:none; text-align:center; padding:2rem 1rem; color:#94a3b8;">
-      <i class="bi bi-shield-check" style="font-size:2.5rem; display:block; margin-bottom:0.75rem; color:#10b981;"></i>
-      <div style="font-size:0.9rem; font-weight:600; color:#10b981;">All Clear</div>
-      <div style="font-size:0.8rem;">No predicted risk events in the next 6 hours.</div>
+        <div id="all-clear-msg" style="display:none; text-align:center; padding:2rem 1rem; color:#94a3b8;">
+          <i class="bi bi-shield-check" style="font-size:2.5rem; display:block; margin-bottom:0.75rem; color:#10b981;"></i>
+          <div style="font-size:0.9rem; font-weight:600; color:#10b981; margin-bottom:0.25rem;">{% trans "All Clear" %}</div>
+          <div style="font-size:0.8rem;">{% trans "No predicted risk events in the next 6 hours." %}</div>
+        </div>
+      </div>
     </div>
   </div>
+
 </div>
 
-{% endif %}{# end if forecast #}
+{% endif %}
 
-<!-- ══ STYLES ════════════════════════════════════════════════════ -->
 <style>
-/* Header */
-.forecast-header {
-  display: flex; justify-content: space-between; align-items: center;
-  flex-wrap: wrap; gap: 1rem;
-  background: linear-gradient(135deg, #1a2e52 0%, #0f172a 100%);
-  border-radius: 16px; padding: 1.5rem 2rem; color: #fff;
+/* ── Page Header ────────────────────────────────────────── */
+.fc-hero-icon {
+  width:52px; height:52px; border-radius:14px;
+  background:rgba(69,177,232,0.12); display:flex;
+  align-items:center; justify-content:center;
+  font-size:1.5rem; color:#45B1E8; flex-shrink:0;
+  border:1px solid rgba(69,177,232,0.2);
 }
-.forecast-header-content { display:flex; align-items:center; gap:1.25rem; }
-.forecast-icon-wrap {
-  width: 52px; height: 52px; border-radius: 14px;
-  background: rgba(69,177,232,0.2); display:flex; align-items:center;
-  justify-content:center; font-size:1.5rem; color:#45B1E8; flex-shrink:0;
+.fc-page-title {
+  font-size:1.3rem; font-weight:800; color:#1a2744;
+  margin:0 0 0.2rem; letter-spacing:-0.02em;
 }
-.forecast-title { font-size:1.3rem; font-weight:800; margin:0 0 0.25rem; letter-spacing:-0.02em; }
-.forecast-subtitle { font-size:0.82rem; color:rgba(255,255,255,0.65); margin:0; }
-.forecast-divider { margin:0 6px; opacity:0.4; }
-.forecast-header-actions { display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; }
-.source-badge {
+.fc-btn-back {
+  display:inline-flex; align-items:center;
+  background:#f8fafc; color:#475569;
+  border:1.5px solid #e2e8f0; border-radius:10px;
+  padding:7px 16px; font-size:0.82rem; font-weight:600;
+  text-decoration:none; transition:all 0.2s;
+  font-family:'Inter',sans-serif;
+}
+.fc-btn-back:hover { background:#f1f5f9; color:#1a2744; border-color:#cbd5e1; }
+
+/* ── Source badges ─────────────────────────────────────── */
+.fc-source-badge {
   display:inline-flex; align-items:center; border-radius:20px;
   padding:5px 14px; font-size:0.72rem; font-weight:700; letter-spacing:0.05em;
 }
-.source-live { background:rgba(16,185,129,0.2); color:#10b981; border:1px solid rgba(16,185,129,0.3); }
-.source-db   { background:rgba(100,116,139,0.2); color:#94a3b8; border:1px solid rgba(100,116,139,0.3); }
+.fc-source-live { background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); }
+.fc-source-db   { background:rgba(100,116,139,0.12); color:#64748b; border:1px solid rgba(100,116,139,0.25); }
 .pulse-dot {
   display:inline-block; width:7px; height:7px; border-radius:50%;
   background:#10b981; margin-right:6px; animation:pulse-dot 1.4s infinite;
 }
-@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-.btn-back {
-  display:inline-flex; align-items:center; background:rgba(255,255,255,0.1);
-  color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:10px;
-  padding:8px 18px; font-size:0.82rem; font-weight:600; text-decoration:none;
-  transition:all 0.2s; backdrop-filter:blur(4px);
-}
-.btn-back:hover { background:rgba(255,255,255,0.18); color:#fff; }
 
-/* KPI strip */
-.kpi-strip { display:flex; gap:0.75rem; flex-wrap:wrap; overflow-x:auto; padding-bottom:4px; }
-.kpi-card {
-  flex:1; min-width:130px; border-radius:14px; padding:1rem 1rem 0.85rem;
-  display:flex; flex-direction:column; gap:0.5rem; border:1px solid transparent;
-  background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.06);
-  transition:transform 0.18s;
+/* ── Assessment Panel ──────────────────────────────────── */
+.fc-assessment-card { background:#fff; }
+.fc-section-label {
+  font-size:0.72rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.08em; color:#64748b; display:flex; align-items:center;
 }
-.kpi-card:hover { transform:translateY(-2px); }
-.kpi-good    { border-color:rgba(16,185,129,0.25);  background:linear-gradient(145deg,#ecfdf5,#fff); }
-.kpi-warning { border-color:rgba(245,158,11,0.3);   background:linear-gradient(145deg,#fffbeb,#fff); }
-.kpi-risk    { border-color:rgba(239,68,68,0.3);    background:linear-gradient(145deg,#fef2f2,#fff); }
-.kpi-hour { font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; }
-.kpi-status-badge {
+.fc-overall-status {
+  display:flex; align-items:center; border-radius:12px;
+  padding:0.75rem 1rem; font-size:0.88rem; font-weight:700;
+}
+.status-good    { background:#dcfce7; color:#15803d; }
+.status-warn    { background:#fef3c7; color:#b45309; }
+.status-risk    { background:#fee2e2; color:#dc2626; }
+.status-loading { background:#f1f5f9; color:#64748b; font-size:0.82rem; }
+.fc-stat-row { display:flex; gap:4px; flex-wrap:wrap; }
+.fc-stat-dot { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+.dot-good { background:#10b981; }
+.dot-warn { background:#f59e0b; }
+.dot-risk { background:#ef4444; }
+.fc-mini-stat {
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:0.78rem; color:#64748b; padding:0.35rem 0.5rem;
+  border-radius:8px; background:#f8fafc;
+}
+.fc-mini-stat span { display:flex; align-items:center; gap:0.4rem; }
+.fc-mini-val { font-weight:700; color:#1a2744; }
+
+/* ── KPI Strip ─────────────────────────────────────────── */
+.fc-kpi-strip { display:flex; gap:0.6rem; flex-wrap:wrap; }
+.fc-kpi {
+  flex:1; min-width:130px; border-radius:14px;
+  padding:1rem 0.9rem 0.85rem; display:flex;
+  flex-direction:column; gap:0.5rem; border:1px solid transparent;
+  background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.05);
+  transition:transform 0.18s, box-shadow 0.18s;
+}
+.fc-kpi:hover { transform:translateY(-3px); box-shadow:0 4px 16px rgba(0,0,0,0.09); }
+.kpi-good { border-color:rgba(16,185,129,0.25); background:linear-gradient(145deg,#ecfdf5,#fff); }
+.kpi-warn { border-color:rgba(245,158,11,0.3);  background:linear-gradient(145deg,#fffbeb,#fff); }
+.kpi-risk { border-color:rgba(239,68,68,0.3);   background:linear-gradient(145deg,#fef2f2,#fff); }
+.fc-kpi-hour {
+  font-size:0.72rem; font-weight:700; color:#64748b;
+  text-transform:uppercase; letter-spacing:0.07em;
+}
+.fc-kpi-badge {
   display:inline-flex; align-items:center; border-radius:20px;
-  padding:4px 10px; font-size:0.72rem; font-weight:700;
+  padding:3px 9px; font-size:0.7rem; font-weight:700;
 }
 .badge-good { background:#dcfce7; color:#15803d; }
 .badge-warn { background:#fef3c7; color:#b45309; }
 .badge-risk { background:#fee2e2; color:#dc2626; }
-.kpi-params { display:flex; flex-direction:column; gap:3px; font-size:0.75rem; color:#475569; font-weight:500; }
-.kpi-params span { display:flex; align-items:center; gap:5px; }
-.text-orange { color:#f97316; }
-.text-blue   { color:#45B1E8; }
-.text-purple { color:#a855f7; }
-.text-teal   { color:#14b8a6; }
+.fc-kpi-params {
+  display:flex; flex-direction:column; gap:3px;
+  font-size:0.74rem; color:#475569; font-weight:500;
+}
+.fc-kpi-params span { display:flex; align-items:center; gap:5px; }
+.fc-kpi-issues {
+  display:flex; flex-direction:column; gap:2px; margin-top:2px;
+  border-top:1px dashed rgba(0,0,0,0.07); padding-top:0.4rem;
+}
+.fc-kpi-issues span { font-size:0.68rem; color:#f59e0b; font-weight:600; line-height:1.4; }
 
-/* Forecast Table */
-.forecast-table { width:100%; border-collapse:collapse; font-family:'Inter',sans-serif; font-size:0.83rem; }
-.forecast-table th {
-  padding:0.65rem 1rem; font-size:0.72rem; font-weight:700; text-transform:uppercase;
-  letter-spacing:0.06em; color:#64748b; background:#f8fafc;
+/* ── Detailed Table ────────────────────────────────────── */
+.fc-table { width:100%; border-collapse:collapse; font-family:'Inter',sans-serif; font-size:0.83rem; }
+.fc-table th {
+  padding:0.65rem 1rem; font-size:0.7rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.06em;
+  color:#64748b; background:#f8fafc;
   border-bottom:2px solid #e2e8f0; white-space:nowrap;
 }
-.forecast-table td { padding:0.75rem 1rem; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
-.forecast-table tbody tr:hover { background:#f8fafc; }
+.fc-table td { padding:0.75rem 1rem; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+.fc-table tbody tr:hover { background:#f8fafc; }
 .row-risk    td { background:rgba(239,68,68,0.03); }
 .row-warning td { background:rgba(245,158,11,0.03); }
 .row-good    td { background:transparent; }
-.hour-chip {
-  display:inline-flex; align-items:center; background:#f1f5f9;
-  color:#1a2744; border-radius:8px; padding:4px 10px; font-size:0.78rem; font-weight:700;
+.fc-hour-chip {
+  display:inline-flex; align-items:center;
+  background:#f1f5f9; color:#1a2744;
+  border-radius:8px; padding:4px 10px;
+  font-size:0.78rem; font-weight:700;
 }
 .fw-600 { font-weight:600; color:#1a2744; }
-.table-badge {
+.fc-table-badge {
   display:inline-flex; align-items:center; border-radius:20px;
-  padding:4px 10px; font-size:0.72rem; font-weight:700; white-space:nowrap;
+  padding:4px 10px; font-size:0.7rem; font-weight:700; white-space:nowrap;
 }
-
-/* Issue lists */
-.issue-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:3px; }
-.issue-list li {
-  font-size:0.75rem; color:#64748b; display:flex; align-items:flex-start; gap:5px;
+.fc-issue-list {
+  list-style:none; margin:0; padding:0;
+  display:flex; flex-direction:column; gap:3px;
 }
-.issue-list li::before { content:"⚠"; color:#f59e0b; flex-shrink:0; }
+.fc-issue-list li {
+  font-size:0.73rem; color:#64748b;
+  display:flex; align-items:flex-start; gap:5px;
+}
+.fc-issue-list li::before { content:"⚠"; color:#f59e0b; flex-shrink:0; }
 
-/* Timeline */
-.alerts-timeline { display:flex; flex-direction:column; gap:0; }
-.timeline-item {
+/* ── Risk Timeline ─────────────────────────────────────── */
+.fc-timeline { display:flex; flex-direction:column; }
+.fc-timeline-item {
   display:flex; gap:1rem; padding:1rem 1rem 1rem 0.5rem;
-  border-left:2px solid #e2e8f0; margin-left:1rem;
-  position:relative;
+  border-left:2px solid #e2e8f0; margin-left:1rem; position:relative;
 }
-.timeline-risk    { border-left-color:#ef4444; }
-.timeline-warning { border-left-color:#f59e0b; }
-.timeline-dot {
-  width:12px; height:12px; border-radius:50%; background:#e2e8f0;
-  position:absolute; left:-7px; top:1.2rem; flex-shrink:0;
+.tl-risk { border-left-color:#ef4444; }
+.tl-warn { border-left-color:#f59e0b; }
+.fc-tl-dot {
+  width:12px; height:12px; border-radius:50%;
+  background:#e2e8f0; position:absolute; left:-7px; top:1.2rem;
 }
-.timeline-risk .timeline-dot    { background:#ef4444; }
-.timeline-warning .timeline-dot { background:#f59e0b; }
-.timeline-content { flex:1; }
-.timeline-header { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; }
-.timeline-hour { font-weight:700; font-size:0.82rem; color:#1a2744; }
-.timeline-issues { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; }
-.timeline-issues li { font-size:0.8rem; color:#64748b; }
-.timeline-issues li::before { content:"→ "; color:#45B1E8; font-weight:700; }
+.tl-risk .fc-tl-dot { background:#ef4444; }
+.tl-warn .fc-tl-dot { background:#f59e0b; }
+.fc-tl-content { flex:1; }
+.fc-tl-header { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; }
+.fc-tl-hour { font-weight:700; font-size:0.82rem; color:#1a2744; }
+.fc-tl-issues { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; }
+.fc-tl-issues li { font-size:0.78rem; color:#64748b; }
+.fc-tl-issues li::before { content:"→ "; color:#45B1E8; font-weight:700; }
 
-/* Empty state */
-.forecast-empty {
-  text-align:center; padding:4rem 2rem; background:#fff; border-radius:16px;
+/* ── Empty State ───────────────────────────────────────── */
+.fc-empty {
+  text-align:center; padding:5rem 2rem;
+  background:#fff; border-radius:16px;
   box-shadow:0 1px 4px rgba(0,0,0,0.05);
+  max-width:520px; margin:2rem auto;
 }
-.forecast-empty-icon { font-size:3rem; color:#cbd5e1; margin-bottom:1rem; }
-.forecast-empty h3 { font-size:1.15rem; font-weight:700; color:#1a2744; margin-bottom:0.5rem; }
-.forecast-empty p { color:#64748b; font-size:0.88rem; margin-bottom:1.5rem; }
-.forecast-btn-primary {
-  display:inline-flex; align-items:center; background:#45B1E8; color:#fff;
-  border-radius:10px; padding:10px 20px; font-size:0.85rem; font-weight:600;
+.fc-empty-icon { font-size:3.5rem; color:#cbd5e1; margin-bottom:1rem; }
+.fc-empty h3 { font-size:1.15rem; font-weight:700; color:#1a2744; margin-bottom:0.5rem; }
+.fc-empty p { color:#64748b; font-size:0.88rem; margin-bottom:1.5rem; line-height:1.6; }
+.fc-btn-primary {
+  display:inline-flex; align-items:center;
+  background:#45B1E8; color:#fff; border-radius:10px;
+  padding:10px 22px; font-size:0.85rem; font-weight:700;
   text-decoration:none; transition:all 0.2s;
 }
-.forecast-btn-primary:hover { background:#2f9fd4; color:#fff; }
+.fc-btn-primary:hover { background:#2f9fd4; color:#fff; }
 
-@media (max-width: 640px) {
-  .forecast-header { padding:1.2rem; }
-  .forecast-header-content { gap:0.8rem; }
-  .forecast-icon-wrap { width:40px; height:40px; font-size:1.15rem; border-radius:10px; }
-  .forecast-title { font-size:1.05rem; }
-  .kpi-card { min-width:min(120px, 45%); }
+@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+@media (max-width:640px) {
+  .fc-hero-icon { width:42px; height:42px; font-size:1.2rem; }
+  .fc-page-title { font-size:1.05rem; }
+  .fc-kpi { min-width:calc(50% - 0.3rem); }
 }
 </style>
 
@@ -367,17 +483,48 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-  // ── Check if any items have issues for all-clear state
-  const forecastItems = {{ forecast|length }};
-  const hasIssues = document.querySelectorAll('.timeline-item').length > 0;
+  // ── 1. Count statuses from DOM data nodes ─────────────────
+  const statusNodes = document.querySelectorAll('#fc-status-data span[data-status]');
+  let nGood = 0, nWarn = 0, nRisk = 0;
+  statusNodes.forEach(function(el) {
+    const s = el.getAttribute('data-status');
+    if (s === 'Good')    nGood++;
+    else if (s === 'Warning') nWarn++;
+    else if (s === 'Risk')    nRisk++;
+  });
+  const total = nGood + nWarn + nRisk;
+
+  const elGood = document.getElementById('count-good');
+  const elWarn = document.getElementById('count-warn');
+  const elRisk = document.getElementById('count-risk');
+  if (elGood) elGood.textContent = nGood + ' / ' + total;
+  if (elWarn) elWarn.textContent = nWarn + ' / ' + total;
+  if (elRisk) elRisk.textContent = nRisk + ' / ' + total;
+
+  // ── 2. Inject overall status badge ────────────────────────
+  const badge = document.getElementById('fc-overall-badge');
+  if (badge) {
+    let html = '';
+    if (nRisk > 0) {
+      html = '<span class="fc-overall-status status-risk"><i class="bi bi-x-octagon-fill me-2"></i>At Risk Predicted</span>';
+    } else if (nWarn > 0) {
+      html = '<span class="fc-overall-status status-warn"><i class="bi bi-exclamation-triangle-fill me-2"></i>Caution Advised</span>';
+    } else {
+      html = '<span class="fc-overall-status status-good"><i class="bi bi-shield-check me-2"></i>All Parameters Safe</span>';
+    }
+    badge.innerHTML = html;
+  }
+
+  // ── 3. All-Clear timeline ──────────────────────────────────
+  const hasIssues = document.querySelectorAll('.fc-timeline-item').length > 0;
   if (!hasIssues) {
     const msgEl = document.getElementById('all-clear-msg');
     if (msgEl) msgEl.style.display = 'block';
   }
 
-  // ── Chart.js Forecast Trend ────────────────────────────────────
+  // ── 4. Chart.js Trend Chart ───────────────────────────────
   const ctx = document.getElementById('forecastChart');
   if (!ctx) return;
 
@@ -389,50 +536,47 @@ document.addEventListener('DOMContentLoaded', function() {
   new Chart(ctx, {
     type: 'line',
     data: {
-      labels,
+      labels: labels,
       datasets: [
         {
           label: 'Temperature (°C)',
           data: tempData,
           borderColor: '#f97316',
-          backgroundColor: 'rgba(249,115,22,0.08)',
+          backgroundColor: 'rgba(249,115,22,0.07)',
           borderWidth: 2.5,
-          pointRadius: 4,
+          pointRadius: 5,
           pointBackgroundColor: '#f97316',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
-          tension: 0.4,
-          fill: true,
-          yAxisID: 'yTemp',
+          pointHoverRadius: 7,
+          tension: 0.4, fill: true, yAxisID: 'yTemp',
         },
         {
           label: 'Dissolved Oxygen (mg/L)',
           data: doData,
           borderColor: '#45B1E8',
-          backgroundColor: 'rgba(69,177,232,0.08)',
+          backgroundColor: 'rgba(69,177,232,0.07)',
           borderWidth: 2.5,
-          pointRadius: 4,
+          pointRadius: 5,
           pointBackgroundColor: '#45B1E8',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
-          tension: 0.4,
-          fill: true,
-          yAxisID: 'yDo',
+          pointHoverRadius: 7,
+          tension: 0.4, fill: true, yAxisID: 'yDo',
         },
         {
           label: 'pH',
           data: phData,
           borderColor: '#a855f7',
-          backgroundColor: 'rgba(168,85,247,0.06)',
+          backgroundColor: 'rgba(168,85,247,0.05)',
           borderWidth: 2.5,
-          pointRadius: 4,
+          pointRadius: 5,
           pointBackgroundColor: '#a855f7',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
-          tension: 0.4,
-          fill: true,
-          yAxisID: 'yPh',
-        },
+          pointHoverRadius: 7,
+          tension: 0.4, fill: true, yAxisID: 'yPh',
+        }
       ]
     },
     options: {
@@ -448,7 +592,8 @@ document.addEventListener('DOMContentLoaded', function() {
           backgroundColor: 'rgba(15,23,42,0.92)',
           titleFont: { family: 'Inter', size: 12, weight: '700' },
           bodyFont:  { family: 'Inter', size: 11 },
-          cornerRadius: 8, padding: 10,
+          cornerRadius: 8, padding: 12,
+          borderColor: 'rgba(69,177,232,0.2)', borderWidth: 1,
         }
       },
       scales: {
@@ -462,17 +607,12 @@ document.addEventListener('DOMContentLoaded', function() {
           ticks: { font: { family: 'Inter', size: 10 }, color: '#f97316' },
           grid: { color: 'rgba(0,0,0,0.04)' },
         },
-        yDo: {
-          type: 'linear', display: false, position: 'right',
-          grid: { drawOnChartArea: false },
-        },
-        yPh: {
-          type: 'linear', display: false, position: 'right',
-          grid: { drawOnChartArea: false },
-        },
+        yDo:  { type: 'linear', display: false, position: 'right', grid: { drawOnChartArea: false } },
+        yPh:  { type: 'linear', display: false, position: 'right', grid: { drawOnChartArea: false } },
       }
     }
   });
+
 });
 </script>
 {% endblock %}

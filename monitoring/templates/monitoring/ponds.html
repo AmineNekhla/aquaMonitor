@@ -11,7 +11,11 @@
 <div class="page-header">
   <div class="page-header-left">
     <h1>{% trans "Ponds Overview" %}</h1>
-    <p>{% trans "Real-time water quality monitoring for all your ponds." %}</p>
+    <p>{% trans "Real-time water quality monitoring for all your ponds." %}
+      <span style="margin-left:0.5rem; display:inline-flex; align-items:center; gap:0.3rem; font-size:0.78rem; color:#45B1E8; font-weight:600;">
+        <i class="bi bi-graph-up-arrow"></i> {% trans "AI Forecast available per pond" %}
+      </span>
+    </p>
   </div>
 </div>
 
@@ -117,11 +121,18 @@
           </span>
         </div>
 
-        <!-- Action Button -->
+        <!-- Action Buttons -->
         <a href="{% url 'pond_detail' item.pond.id %}"
-           class="btn-primary-custom w-100 justify-content-center"
+           class="btn-primary-custom w-100 justify-content-center mb-2"
            style="border-radius: 10px;">
           {% trans "View Live Monitor" %} <i class="bi bi-arrow-right"></i>
+        </a>
+        <a href="{% url 'forecast' item.pond.id %}"
+           class="w-100 d-flex align-items-center justify-content-center gap-2"
+           style="background:rgba(69,177,232,0.1); color:#45B1E8; border:1.5px solid rgba(69,177,232,0.3); border-radius:10px; padding:0.55rem 1rem; font-size:0.82rem; font-weight:700; text-decoration:none; transition:all 0.2s; font-family:'Inter',sans-serif;">
+          <i class="bi bi-graph-up-arrow" style="font-size:0.9rem;"></i>
+          {% trans "AI Forecast" %}
+          <span style="font-size:0.55rem; font-weight:800; background:rgba(69,177,232,0.2); color:#45B1E8; padding:1px 5px; border-radius:4px; letter-spacing:0.05em;">6H</span>
         </a>
       </div>
 

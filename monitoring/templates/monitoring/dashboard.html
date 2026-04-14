@@ -46,6 +46,9 @@
       <a href="{% url 'ponds_list' %}" class="btn-hero-primary">
         <i class="bi bi-grid"></i> {% trans "Ponds Overview" %}
       </a>
+      <a href="{% url 'ponds_list' %}" class="btn-hero-outline" style="border-color: rgba(69,177,232,0.5); color: #45B1E8;">
+        <i class="bi bi-graph-up-arrow"></i> {% trans "AI Forecasting" %}
+      </a>
       <a href="{% url 'alerts_list' %}" class="btn-hero-outline">
         <i class="bi bi-bell"></i> {% trans "Alert Center" %}
       </a>
@@ -146,7 +149,7 @@
 <div class="row g-3 mb-2">
 
   <!-- Farms -->
-  <div class="col-sm-6 col-xl-3">
+  <div class="col-sm-6 col-xl">
     <a href="{% url 'farms_list' %}" class="card card-hover text-decoration-none" style="border: none;">
       <div class="card-body d-flex align-items-center gap-3 p-3">
         <div class="stat-icon bg-primary-soft text-primary-custom" style="border-radius:12px;">
@@ -162,7 +165,7 @@
   </div>
 
   <!-- Ponds -->
-  <div class="col-sm-6 col-xl-3">
+  <div class="col-sm-6 col-xl">
     <a href="{% url 'ponds_list' %}" class="card card-hover text-decoration-none" style="border: none;">
       <div class="card-body d-flex align-items-center gap-3 p-3">
         <div class="stat-icon bg-accent-soft text-primary-custom" style="border-radius:12px;">
@@ -177,8 +180,27 @@
     </a>
   </div>
 
+  <!-- AI Forecasting -->
+  <div class="col-sm-6 col-xl">
+    <a href="{% url 'ponds_list' %}" class="card card-hover text-decoration-none dashboard-forecast-card" style="border: none;">
+      <div class="card-body d-flex align-items-center gap-3 p-3">
+        <div class="stat-icon" style="background:rgba(69,177,232,0.12); color:#45B1E8; border-radius:12px;">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <div>
+          <div style="font-size:0.8rem; font-weight:700; color:#1a2744; display:flex; align-items:center; gap:0.4rem;">
+            {% trans "Forecasting" %}
+            <span style="font-size:0.52rem; font-weight:800; background:rgba(69,177,232,0.18); color:#45B1E8; padding:1px 5px; border-radius:5px; letter-spacing:0.04em;">AI</span>
+          </div>
+          <div style="font-size:0.75rem; color:#64748b;">{% trans "6-hour predictions" %}</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto text-muted-custom"></i>
+      </div>
+    </a>
+  </div>
+
   <!-- Alerts -->
-  <div class="col-sm-6 col-xl-3">
+  <div class="col-sm-6 col-xl">
     <a href="{% url 'alerts_list' %}" class="card card-hover text-decoration-none" style="border: none;">
       <div class="card-body d-flex align-items-center gap-3 p-3">
         <div class="stat-icon bg-danger-soft" style="color:#ef4444; border-radius:12px;">
@@ -194,7 +216,7 @@
   </div>
 
   <!-- Profile -->
-  <div class="col-sm-6 col-xl-3">
+  <div class="col-sm-6 col-xl">
     <a href="{% url 'profile' %}" class="card card-hover text-decoration-none" style="border: none;">
       <div class="card-body d-flex align-items-center gap-3 p-3">
         <div class="stat-icon" style="background:#ede9fe; color:#7c3aed; border-radius:12px;">
